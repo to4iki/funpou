@@ -84,15 +84,12 @@ fn insert_under_heading(content: &str, heading: &str, entry: &str) -> String {
 
             let insert_at = insert_before.unwrap_or(lines.len());
 
-            let result: Vec<&str> = lines[..insert_at].to_vec();
-            let after: Vec<&str> = lines[insert_at..].to_vec();
-
-            let mut output = result.join("\n");
+            let mut output = lines[..insert_at].join("\n");
             output.push('\n');
             output.push_str(entry);
             output.push('\n');
-            if !after.is_empty() {
-                output.push_str(&after.join("\n"));
+            if insert_at < lines.len() {
+                output.push_str(&lines[insert_at..].join("\n"));
                 // Preserve trailing newline if original had one
                 if content.ends_with('\n') {
                     output.push('\n');
