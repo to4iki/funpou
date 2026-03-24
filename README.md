@@ -19,12 +19,17 @@ funpou add fix the login bug
 # List all memos
 funpou list
 
+# List in oldest-first order
+funpou list -r
+
 # Search with fzf
 funpou list | fzf
 
 # Show last 10 memos
 funpou list -n 10
 ```
+
+`funpou list` shows newest memos first by default. Use `-r` / `--reverse` for oldest first.
 
 ## Installation
 

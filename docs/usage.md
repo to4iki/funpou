@@ -27,12 +27,14 @@ Print all saved memos to stdout.
 funpou list
 ```
 
+Default order is newest first.
+
 #### Flags
 
 | Flag | Description |
 |------|-------------|
 | `-n, --limit <N>` | Show only the last N memos |
-| `-r, --reverse` | Reverse order (oldest last) |
+| `-r, --reverse` | Reverse order (oldest first) |
 | `--json` | Output raw JSONL for scripting |
 
 Examples:
@@ -41,7 +43,7 @@ Examples:
 # Last 20 memos
 funpou list -n 20
 
-# Reverse chronological order
+# Oldest-first order
 funpou list -r
 
 # Raw JSON output

@@ -8,8 +8,8 @@ use crate::storage;
 
 /// Apply limit and reverse to a list of memos.
 ///
-/// Limit selects the N most recent (last) memos, then reverse controls
-/// display order (default: chronological, reverse: newest first).
+/// Limit selects the N most recent (last) memos, then default display order
+/// is newest first and `reverse` flips that to oldest first.
 fn prepare_memos(mut memos: Vec<Memo>, limit: Option<usize>, reverse: bool) -> Vec<Memo> {
     // Apply limit: keep only the last N (most recent) memos
     if let Some(n) = limit {
@@ -19,8 +19,10 @@ fn prepare_memos(mut memos: Vec<Memo>, limit: Option<usize>, reverse: bool) -> V
         }
     }
 
-    // Default: newest last (chronological order as stored)
-    // --reverse: newest first (reverse chronological)
+    // Default: newest first (reverse chronological)
+    // --reverse: oldest first (chronological)
+    memos.reverse();
+
     if reverse {
         memos.reverse();
     }
@@ -85,11 +87,11 @@ mod tests {
         ];
 
         let result = prepare_memos(memos, Some(2), false);
-        assert_eq!(bodies(&result), vec!["middle", "newest"]);
+        assert_eq!(bodies(&result), vec!["newest", "middle"]);
     }
 
     #[test]
-    fn limit_with_reverse_returns_most_recent_in_reverse_order() {
+    fn limit_with_reverse_returns_most_recent_in_oldest_first_order() {
         let memos = vec![
             memo_at("memo-1", 2025, 1, 1),
             memo_at("memo-2", 2025, 3, 1),
@@ -98,13 +100,13 @@ mod tests {
             memo_at("memo-5", 2025, 9, 1),
         ];
 
-        // `--reverse -n 3` should return the 3 most recent memos in reverse order
+        // `--reverse -n 3` should return the 3 most recent memos oldest first
         let result = prepare_memos(memos, Some(3), true);
-        assert_eq!(bodies(&result), vec!["memo-5", "memo-4", "memo-3"]);
+        assert_eq!(bodies(&result), vec!["memo-3", "memo-4", "memo-5"]);
     }
 
     #[test]
-    fn reverse_without_limit_reverses_all() {
+    fn reverse_without_limit_returns_chronological_order() {
         let memos = vec![
             memo_at("first", 2025, 1, 1),
             memo_at("second", 2025, 6, 1),
@@ -112,7 +114,7 @@ mod tests {
         ];
 
         let result = prepare_memos(memos, None, true);
-        assert_eq!(bodies(&result), vec!["third", "second", "first"]);
+        assert_eq!(bodies(&result), vec!["first", "second", "third"]);
     }
 
     #[test]
@@ -123,11 +125,11 @@ mod tests {
         ];
 
         let result = prepare_memos(memos, Some(10), false);
-        assert_eq!(bodies(&result), vec!["only-one", "only-two"]);
+        assert_eq!(bodies(&result), vec!["only-two", "only-one"]);
     }
 
     #[test]
-    fn no_limit_no_reverse_returns_chronological() {
+    fn no_limit_no_reverse_returns_newest_first() {
         let memos = vec![
             memo_at("a", 2025, 1, 1),
             memo_at("b", 2025, 6, 1),
@@ -135,6 +137,6 @@ mod tests {
         ];
 
         let result = prepare_memos(memos, None, false);
-        assert_eq!(bodies(&result), vec!["a", "b", "c"]);
+        assert_eq!(bodies(&result), vec!["c", "b", "a"]);
     }
 }

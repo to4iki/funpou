@@ -26,7 +26,7 @@ pub enum Command {
         #[arg(short = 'n', long)]
         limit: Option<usize>,
 
-        /// Reverse order (oldest last)
+        /// Reverse order (oldest first)
         #[arg(short, long)]
         reverse: bool,
 
