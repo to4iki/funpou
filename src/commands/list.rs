@@ -21,9 +21,7 @@ fn prepare_memos(mut memos: Vec<Memo>, limit: Option<usize>, reverse: bool) -> V
 
     // Default: newest first (reverse chronological)
     // --reverse: oldest first (chronological)
-    memos.reverse();
-
-    if reverse {
+    if !reverse {
         memos.reverse();
     }
 
