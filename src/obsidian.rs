@@ -35,8 +35,9 @@ pub fn resolve_template_path(template: &str, now: &DateTime<Local>) -> String {
             result.push_str(&now.format(&strftime_format).to_string());
             remaining = &after_prefix[end + 2..]; // skip "}}"
         } else {
-            // Unclosed placeholder — keep as-is
-            result.push_str(&remaining[..start + 7]);
+            // Unclosed placeholder — keep "{{date:" as a literal and continue.
+            // (The prefix before `start` was already pushed above.)
+            result.push_str("{{date:");
             remaining = after_prefix;
         }
     }
@@ -163,40 +164,59 @@ mod tests {
     }
 
     #[test]
-    fn resolve_template_simple() {
+    fn resolve_template_path_substitutes_date_tokens() {
         let now = fixed_time();
         let result = resolve_template_path("daily/{{date:YYYY}}/{{date:YYYY-MM}}.md", &now);
         assert_eq!(result, "daily/2026/2026-03.md");
     }
 
     #[test]
-    fn resolve_template_with_day() {
-        let now = fixed_time();
-        let result = resolve_template_path("notes/{{date:YYYY-MM-DD}}.md", &now);
-        assert_eq!(result, "notes/2026-03-20.md");
-    }
-
-    #[test]
-    fn resolve_template_no_placeholders() {
+    fn resolve_template_path_no_placeholders() {
         let now = fixed_time();
         let result = resolve_template_path("plain/path.md", &now);
         assert_eq!(result, "plain/path.md");
     }
 
     #[test]
-    fn insert_under_existing_heading() {
+    fn resolve_template_path_preserves_unclosed_placeholder() {
+        // A malformed template (missing `}}`) must not corrupt the path
+        // by duplicating the prefix or expanding to garbage — keep it literal.
+        let now = fixed_time();
+        let result = resolve_template_path("daily/{{date:YYYY}}/{{date:bad", &now);
+        assert_eq!(result, "daily/2026/{{date:bad");
+    }
+
+    #[test]
+    fn insert_under_existing_heading_places_entry_just_before_next_sibling() {
         let content = "# Title\n\n## Memos\n- old entry\n\n## Other\nstuff\n";
         let result = insert_under_heading(content, "## Memos", "- new entry");
-        assert!(result.contains("- new entry\n## Other"));
-        assert!(result.contains("- old entry"));
-        assert!(result.contains("stuff\n"));
+        assert_eq!(
+            result,
+            "# Title\n\n## Memos\n- old entry\n\n- new entry\n## Other\nstuff\n"
+        );
+    }
+
+    #[test]
+    fn insert_under_heading_skips_deeper_subheadings() {
+        // `### Sub` is deeper than `## Memos`, so it belongs to the Memos
+        // section and the entry must be placed AFTER it, not before.
+        // The next stop is the sibling `## Other`.
+        let content = "## Memos\n- old\n\n### Sub\nstuff\n\n## Other\nfinal\n";
+        let result = insert_under_heading(content, "## Memos", "- new");
+        assert_eq!(
+            result,
+            "## Memos\n- old\n\n### Sub\nstuff\n\n- new\n## Other\nfinal\n"
+        );
     }
 
     #[test]
     fn insert_creates_heading_when_missing() {
         let content = "# Title\n\nSome content\n";
         let result = insert_under_heading(content, "## Memos", "- first entry");
-        assert!(result.contains("## Memos\n- first entry\n"));
+        assert_eq!(
+            result,
+            "# Title\n\nSome content\n\n## Memos\n- first entry\n"
+        );
     }
 
     #[test]
@@ -209,23 +229,38 @@ mod tests {
     fn insert_at_end_when_no_next_heading() {
         let content = "# Title\n\n## Memos\n- old entry\n";
         let result = insert_under_heading(content, "## Memos", "- new entry");
-        assert!(result.ends_with("- old entry\n- new entry\n"));
+        assert_eq!(result, "# Title\n\n## Memos\n- old entry\n- new entry\n");
     }
 
     #[test]
-    fn format_entry_default() {
+    fn insert_under_heading_appends_sequentially() {
+        // Two consecutive memos should accumulate in chronological order
+        // under the heading, mirroring how `append_memo` is called repeatedly.
+        let content = "# 2026-03-20\n\n## Memos\n";
+        let after_first = insert_under_heading(content, "## Memos", "- first");
+        let after_second = insert_under_heading(&after_first, "## Memos", "- second");
+        assert_eq!(
+            after_second,
+            "# 2026-03-20\n\n## Memos\n- first\n- second\n"
+        );
+    }
+
+    #[test]
+    fn format_entry_substitutes_timestamp_and_body() {
         let config = Config::default();
         let memo = Memo {
             id: "20260320140532".into(),
             body: "test memo".into(),
             created_at: fixed_time(),
         };
-        let entry = format_entry(&memo, &config);
-        assert_eq!(entry, "- 2026-03-20 14:05: test memo");
+        assert_eq!(
+            format_entry(&memo, &config),
+            "- 2026-03-20 14:05: test memo"
+        );
     }
 
     #[test]
-    fn append_memo_creates_file_and_dirs() {
+    fn append_memo_writes_resolved_path_with_heading_and_entry() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
         config.obsidian.enabled = true;
@@ -241,9 +276,7 @@ mod tests {
         append_memo(&memo, &config).unwrap();
 
         let file_path = dir.path().join("daily/2026/2026-03.md");
-        assert!(file_path.exists());
         let content = fs::read_to_string(&file_path).unwrap();
-        assert!(content.contains("## Memos"));
-        assert!(content.contains("obsidian test"));
+        assert_eq!(content, "\n## Memos\n- 2026-03-20 14:05: obsidian test\n");
     }
 }

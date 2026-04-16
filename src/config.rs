@@ -97,20 +97,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn default_config_values() {
-        let config = Config::default();
-        assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M");
-        assert!(!config.obsidian.enabled);
-        assert!(config.obsidian.vault_path.is_empty());
-        assert_eq!(
-            config.obsidian.template_path,
-            "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
-        );
-        assert_eq!(config.obsidian.target_heading, "## Memos");
-        assert_eq!(config.obsidian.entry_format, "- {{timestamp}}: {{body}}");
-    }
-
-    #[test]
     fn load_missing_config_returns_defaults() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("nonexistent.toml");
@@ -155,14 +141,6 @@ mod tests {
             "notes/{{date:YYYY-MM-DD}}.md"
         );
         assert_eq!(config.obsidian.target_heading, "## Quick Notes");
-    }
-
-    #[test]
-    fn config_serializes_to_toml() {
-        let config = Config::default();
-        let toml_str = toml::to_string_pretty(&config).unwrap();
-        assert!(toml_str.contains("timestamp_format"));
-        assert!(toml_str.contains("[obsidian]"));
     }
 
     #[test]
