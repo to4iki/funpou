@@ -1,6 +1,6 @@
 # funpou
 
-A minimal CLI tool for quick one-line memos with automatic timestamps.
+Quick one-line memos with automatic timestamps.
 
 ## Features
 

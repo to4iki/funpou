@@ -4,7 +4,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "fnp",
     version,
-    about = "A minimal CLI tool for quick one-line memos"
+    about = "Quick one-line memos with automatic timestamps"
 )]
 pub struct Cli {
     #[command(subcommand)]
