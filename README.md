@@ -34,7 +34,7 @@ fnp list -n 10
 ## Installation
 
 ```sh
-cargo install --path .
+cargo install funpou
 ```
 
 ## Configuration
