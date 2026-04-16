@@ -6,12 +6,20 @@ use anyhow::{Context, Result};
 
 use crate::memo::Memo;
 
+/// Resolve the data file path from home and XDG_DATA_HOME, preferring XDG.
+fn data_path_from(home: Option<&Path>, xdg_data_home: Option<&Path>) -> Option<PathBuf> {
+    let base = xdg_data_home
+        .map(PathBuf::from)
+        .or_else(|| home.map(|h| h.join(".local").join("share")))?;
+    Some(base.join("funpou").join("memos.jsonl"))
+}
+
 /// Returns the default JSONL storage path.
+/// Prefers `$XDG_DATA_HOME/funpou/memos.jsonl`, falling back to `~/.local/share/funpou/memos.jsonl`.
 pub fn default_data_path() -> Result<PathBuf> {
-    let data_dir = dirs::data_dir()
-        .context("Could not determine data directory")?
-        .join("funpou");
-    Ok(data_dir.join("memos.jsonl"))
+    let home = dirs::home_dir();
+    let xdg = std::env::var_os("XDG_DATA_HOME").map(PathBuf::from);
+    data_path_from(home.as_deref(), xdg.as_deref()).context("Could not determine data directory")
 }
 
 /// Append a single memo to the JSONL file.
@@ -110,5 +118,28 @@ mod tests {
 
         let memos = read_all(&path).unwrap();
         assert_eq!(memos.len(), 1);
+    }
+
+    #[test]
+    fn data_path_prefers_xdg_data_home() {
+        let home = Path::new("/Users/foo");
+        let xdg = Path::new("/custom/data");
+        let path = data_path_from(Some(home), Some(xdg)).unwrap();
+        assert_eq!(path, PathBuf::from("/custom/data/funpou/memos.jsonl"));
+    }
+
+    #[test]
+    fn data_path_falls_back_to_local_share() {
+        let home = Path::new("/Users/foo");
+        let path = data_path_from(Some(home), None).unwrap();
+        assert_eq!(
+            path,
+            PathBuf::from("/Users/foo/.local/share/funpou/memos.jsonl")
+        );
+    }
+
+    #[test]
+    fn data_path_none_without_home_or_xdg() {
+        assert!(data_path_from(None, None).is_none());
     }
 }
