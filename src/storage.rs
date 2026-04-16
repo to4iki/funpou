@@ -67,7 +67,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn append_and_read_roundtrip() {
+    fn append_and_read_preserves_memos_in_order() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("memos.jsonl");
 
@@ -77,10 +77,9 @@ mod tests {
         append_memo(&path, &memo1).unwrap();
         append_memo(&path, &memo2).unwrap();
 
-        let memos = read_all(&path).unwrap();
-        assert_eq!(memos.len(), 2);
-        assert_eq!(memos[0].body, "first memo");
-        assert_eq!(memos[1].body, "second memo");
+        // Full equality also covers the JSONL serde roundtrip
+        // (id, body, created_at all survive a write/read cycle).
+        assert_eq!(read_all(&path).unwrap(), vec![memo1, memo2]);
     }
 
     #[test]
@@ -116,8 +115,7 @@ mod tests {
         let memo = Memo::new("nested test".into());
         append_memo(&path, &memo).unwrap();
 
-        let memos = read_all(&path).unwrap();
-        assert_eq!(memos.len(), 1);
+        assert_eq!(read_all(&path).unwrap(), vec![memo]);
     }
 
     #[test]

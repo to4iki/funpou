@@ -31,35 +31,27 @@ impl Memo {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::TimeZone;
 
     #[test]
-    fn new_memo_has_timestamp_id() {
-        let memo = Memo::new("test memo".into());
-        assert_eq!(memo.id.len(), 14); // YYYYMMDDhhmmss
-        assert!(memo.id.chars().all(|c| c.is_ascii_digit()));
-    }
-
-    #[test]
-    fn new_memo_stores_body() {
+    fn new_memo_id_derives_from_created_at() {
         let memo = Memo::new("hello world".into());
+        // The id is the on-disk identifier and sort key; binding it to
+        // created_at locks in the contract that they cannot drift apart.
+        assert_eq!(memo.id, memo.created_at.format("%Y%m%d%H%M%S").to_string());
         assert_eq!(memo.body, "hello world");
     }
 
     #[test]
-    fn serde_roundtrip() {
-        let memo = Memo::new("roundtrip test".into());
-        let json = serde_json::to_string(&memo).unwrap();
-        let deserialized: Memo = serde_json::from_str(&json).unwrap();
-        assert_eq!(memo, deserialized);
-    }
-
-    #[test]
-    fn format_display_default() {
-        let memo = Memo::new("display test".into());
-        let output = memo.format_display("%Y-%m-%d %H:%M");
-        assert!(output.ends_with(": display test"));
-        // Timestamp portion should be 16 chars: "YYYY-MM-DD HH:MM"
-        let timestamp_part = output.split(": ").next().unwrap();
-        assert_eq!(timestamp_part.len(), 16);
+    fn format_display_renders_timestamp_then_body() {
+        let memo = Memo {
+            id: "20260320140532".into(),
+            body: "display test".into(),
+            created_at: Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap(),
+        };
+        assert_eq!(
+            memo.format_display("%Y-%m-%d %H:%M"),
+            "2026-03-20 14:05: display test"
+        );
     }
 }
