@@ -2,13 +2,13 @@
 
 ## Commands
 
-### `funpou add <TEXT...>`
+### `fnp add <TEXT...>`
 
 Save a one-line memo with an automatic timestamp.
 
 ```sh
-funpou add fix the login bug
-funpou add "refactor auth module"
+fnp add fix the login bug
+fnp add "refactor auth module"
 ```
 
 Multiple words are joined with spaces. Quotes are optional.
@@ -19,12 +19,12 @@ Output (printed to stderr):
 2026-03-20 14:05: fix the login bug
 ```
 
-### `funpou list`
+### `fnp list`
 
 Print all saved memos to stdout.
 
 ```sh
-funpou list
+fnp list
 ```
 
 Default order is newest first.
@@ -41,22 +41,22 @@ Examples:
 
 ```sh
 # Last 20 memos
-funpou list -n 20
+fnp list -n 20
 
 # Oldest-first order
-funpou list -r
+fnp list -r
 
 # Raw JSON output
-funpou list --json
+fnp list --json
 ```
 
-### `funpou config`
+### `fnp config`
 
 Show the resolved configuration.
 
 ```sh
-funpou config          # Print full config as TOML
-funpou config --path   # Print config file path only
+fnp config          # Print full config as TOML
+fnp config --path   # Print config file path only
 ```
 
 ## Shell Integration
@@ -64,9 +64,9 @@ funpou config --path   # Print config file path only
 ### Aliases
 
 ```sh
-alias f="funpou add"
-alias fl="funpou list | fzf"
-alias fll="funpou list -n 20"
+alias f="fnp add"
+alias fl="fnp list | fzf"
+alias fll="fnp list -n 20"
 ```
 
 ### fzf
@@ -74,17 +74,17 @@ alias fll="funpou list -n 20"
 Pipe the list output to `fzf` for interactive search:
 
 ```sh
-funpou list | fzf
+fnp list | fzf
 ```
 
 ### JSON processing with jq
 
 ```sh
 # Extract only memo bodies
-funpou list --json | jq -r '.body'
+fnp list --json | jq -r '.body'
 
 # Filter by date
-funpou list --json | jq 'select(.created_at | startswith("2026-03"))'
+fnp list --json | jq 'select(.created_at | startswith("2026-03"))'
 ```
 
 ## Data Storage

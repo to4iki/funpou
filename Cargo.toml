@@ -20,6 +20,10 @@ include = [
     "LICENSE",
 ]
 
+[[bin]]
+name = "fnp"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1"
 chrono = { version = "0.4", features = ["serde"] }
