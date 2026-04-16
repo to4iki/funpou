@@ -2,7 +2,7 @@
 
 ## Overview
 
-funpou is a minimal Rust CLI tool for quick one-line memos with automatic timestamps and optional Obsidian integration.
+funpou is a Rust CLI for quick one-line memos with automatic timestamps and optional Obsidian integration.
 
 ## Tech Stack
 

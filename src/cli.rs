@@ -2,9 +2,9 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[command(
-    name = "funpou",
+    name = "fnp",
     version,
-    about = "A minimal CLI tool for quick one-line memos"
+    about = "Quick one-line memos with automatic timestamps"
 )]
 pub struct Cli {
     #[command(subcommand)]

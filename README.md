@@ -1,6 +1,6 @@
 # funpou
 
-A minimal CLI tool for quick one-line memos with automatic timestamps.
+Quick one-line memos with automatic timestamps.
 
 ## Features
 
@@ -14,22 +14,22 @@ A minimal CLI tool for quick one-line memos with automatic timestamps.
 
 ```sh
 # Save a memo
-funpou add fix the login bug
+fnp add fix the login bug
 
 # List all memos
-funpou list
+fnp list
 
 # List in oldest-first order
-funpou list -r
+fnp list -r
 
 # Search with fzf
-funpou list | fzf
+fnp list | fzf
 
 # Show last 10 memos
-funpou list -n 10
+fnp list -n 10
 ```
 
-`funpou list` shows newest memos first by default. Use `-r` / `--reverse` for oldest first.
+`fnp list` shows newest memos first by default. Use `-r` / `--reverse` for oldest first.
 
 ## Installation
 

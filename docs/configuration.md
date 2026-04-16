@@ -9,8 +9,8 @@ funpou works with zero configuration. All settings are optional.
 Create this file manually when you want to customize behavior. To check the resolved config:
 
 ```sh
-funpou config
-funpou config --path
+fnp config
+fnp config --path
 ```
 
 ## Options

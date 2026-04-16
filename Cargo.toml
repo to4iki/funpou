@@ -2,8 +2,27 @@
 name = "funpou"
 version = "0.1.0"
 edition = "2024"
-description = "A minimal CLI tool for quick one-line memos with timestamps"
+rust-version = "1.85"
+description = "Quick one-line memos with automatic timestamps"
 license = "MIT"
+authors = ["Toshiki Takezawa <tsk.take815@gmail.com>"]
+repository = "https://github.com/to4iki/funpou"
+homepage = "https://github.com/to4iki/funpou"
+documentation = "https://docs.rs/funpou"
+readme = "README.md"
+keywords = ["memo", "cli", "note", "obsidian", "journal"]
+categories = ["command-line-utilities"]
+include = [
+    "src/**/*.rs",
+    "Cargo.toml",
+    "Cargo.lock",
+    "README.md",
+    "LICENSE",
+]
+
+[[bin]]
+name = "fnp"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
