@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.1.1](https://github.com/to4iki/funpou/compare/v0.1.0...v0.1.1) - 2026-04-17
+- ci(tagpr): use GitHub App token to trigger downstream release workflow by @to4iki in https://github.com/to4iki/funpou/pull/9
+- docs: add mise as alternative installation method by @to4iki in https://github.com/to4iki/funpou/pull/11
+
 ## [v0.1.0](https://github.com/to4iki/funpou/commits/v0.1.0) - 2026-04-16
 - ci: add tagpr and release binary upload workflow by @to4iki in https://github.com/to4iki/funpou/pull/1
 - fix(ci): grant issues:write permission to tagpr by @to4iki in https://github.com/to4iki/funpou/pull/2
