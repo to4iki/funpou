@@ -33,8 +33,14 @@ fnp list -n 10
 
 ## Installation
 
-```sh
+```bash
 cargo install funpou
+```
+
+Or install via [mise](https://mise.jdx.dev/):
+
+```bash
+mise use -g github:to4iki/funpou
 ```
 
 ## Configuration
@@ -51,8 +57,6 @@ template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
 target_heading = "## Memos"
 entry_format = "- {{timestamp}}: {{body}}"
 ```
-
-See [docs/configuration.md](docs/configuration.md) for details.
 
 ## Documentation
 
