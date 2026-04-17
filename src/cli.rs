@@ -41,4 +41,11 @@ pub enum Command {
         #[arg(long)]
         path: bool,
     },
+
+    /// Delete all saved memos after confirmation
+    Clear {
+        /// Skip the confirmation prompt
+        #[arg(short = 'y', long)]
+        yes: bool,
+    },
 }

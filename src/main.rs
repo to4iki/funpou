@@ -31,6 +31,9 @@ fn main() -> Result<()> {
         Command::Config { path } => {
             commands::config::execute(&config, &config_path, path)?;
         }
+        Command::Clear { yes } => {
+            commands::clear::execute(&data_path, yes)?;
+        }
     }
 
     Ok(())

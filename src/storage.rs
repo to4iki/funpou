@@ -41,6 +41,14 @@ pub fn append_memo(path: &Path, memo: &Memo) -> Result<()> {
     Ok(())
 }
 
+/// Remove the JSONL file. No-op if the file does not exist.
+pub fn clear_all(path: &Path) -> Result<()> {
+    if !path.exists() {
+        return Ok(());
+    }
+    fs::remove_file(path).with_context(|| format!("Failed to remove file: {}", path.display()))
+}
+
 /// Read all memos from the JSONL file.
 /// Silently skips malformed lines.
 pub fn read_all(path: &Path) -> Result<Vec<Memo>> {
@@ -80,6 +88,27 @@ mod tests {
         // Full equality also covers the JSONL serde roundtrip
         // (id, body, created_at all survive a write/read cycle).
         assert_eq!(read_all(&path).unwrap(), vec![memo1, memo2]);
+    }
+
+    #[test]
+    fn clear_all_removes_existing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("memos.jsonl");
+
+        append_memo(&path, &Memo::new("to be cleared".into())).unwrap();
+        assert!(path.exists());
+
+        clear_all(&path).unwrap();
+        assert!(!path.exists());
+        assert!(read_all(&path).unwrap().is_empty());
+    }
+
+    #[test]
+    fn clear_all_is_noop_for_missing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("nonexistent.jsonl");
+        clear_all(&path).unwrap();
+        assert!(!path.exists());
     }
 
     #[test]
