@@ -1,4 +1,4 @@
-# funpou
+# funpou (分報)
 
 Quick one-line memos with automatic timestamps.
 
@@ -27,6 +27,12 @@ fnp list | fzf
 
 # Show last 10 memos
 fnp list -n 10
+
+# Clear all memos (with confirmation)
+fnp clear
+
+# Clear all memos without confirmation
+fnp clear --yes
 ```
 
 `fnp list` shows newest memos first by default. Use `-r` / `--reverse` for oldest first.
