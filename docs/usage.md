@@ -50,6 +50,20 @@ fnp list -r
 fnp list --json
 ```
 
+### `fnp clear`
+
+Delete all saved memos after confirmation.
+
+```sh
+fnp clear       # Prompts "Clear N memo(s)? [y/N]:"
+fnp clear --yes # Skip confirmation (useful for scripts)
+fnp clear -y    # Short form of --yes
+```
+
+Only an explicit `y` or `yes` (case-insensitive) proceeds with deletion. Any other input — including pressing Enter — cancels.
+
+If there are no memos, the command exits immediately with `No memos to clear.`
+
 ### `fnp config`
 
 Show the resolved configuration.
