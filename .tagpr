@@ -2,4 +2,4 @@
 	vPrefix = true
 	releaseBranch = main
 	versionFile = Cargo.toml
-	command = cargo update -p funpou
+	command = cargo update --workspace
