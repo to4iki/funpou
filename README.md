@@ -33,8 +33,14 @@ fnp list -n 10
 
 ## Installation
 
-```sh
+```bash
 cargo install funpou
+```
+
+Or install via [mise](https://mise.jdx.dev/):
+
+```bash
+mise use -g github:to4iki/funpou
 ```
 
 ## Configuration
