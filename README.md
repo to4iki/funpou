@@ -1,4 +1,4 @@
-# funpou
+# funpou (分報)
 
 Quick one-line memos with automatic timestamps.
 
