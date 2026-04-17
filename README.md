@@ -58,8 +58,6 @@ target_heading = "## Memos"
 entry_format = "- {{timestamp}}: {{body}}"
 ```
 
-See [docs/configuration.md](docs/configuration.md) for details.
-
 ## Documentation
 
 - [Configuration](docs/configuration.md) — All config options and Obsidian setup
