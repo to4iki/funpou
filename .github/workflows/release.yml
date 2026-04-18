@@ -15,12 +15,16 @@ jobs:
         include:
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-latest
+            archive: fnp-linux-amd64
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
+            archive: fnp-linux-arm64
           - target: x86_64-apple-darwin
             os: macos-latest
+            archive: fnp-darwin-amd64
           - target: aarch64-apple-darwin
             os: macos-latest
+            archive: fnp-darwin-arm64
 
     runs-on: ${{ matrix.os }}
 
@@ -33,7 +37,7 @@ jobs:
         with:
           bin: fnp
           target: ${{ matrix.target }}
-          archive: $bin-$target
+          archive: ${{ matrix.archive }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
