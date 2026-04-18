@@ -6,6 +6,12 @@
 - docs: add clear command usage and Japanese name to README by @to4iki in https://github.com/to4iki/funpou/pull/15
 - ci: rename release assets to maltmill-compatible naming by @to4iki in https://github.com/to4iki/funpou/pull/16
 
+## [v0.1.2](https://github.com/to4iki/funpou/compare/v0.1.1...v0.1.2) - 2026-04-18
+- ci: sync Cargo.lock in tagpr PRs and auto-publish on release by @to4iki in https://github.com/to4iki/funpou/pull/12
+- feat(clear): add clear command to delete all memos with confirmation by @to4iki in https://github.com/to4iki/funpou/pull/14
+- docs: add clear command usage and Japanese name to README by @to4iki in https://github.com/to4iki/funpou/pull/15
+- ci: rename release assets to maltmill-compatible naming by @to4iki in https://github.com/to4iki/funpou/pull/16
+
 ## [v0.1.1](https://github.com/to4iki/funpou/compare/v0.1.0...v0.1.1) - 2026-04-17
 - ci(tagpr): use GitHub App token to trigger downstream release workflow by @to4iki in https://github.com/to4iki/funpou/pull/9
 - docs: add mise as alternative installation method by @to4iki in https://github.com/to4iki/funpou/pull/11
