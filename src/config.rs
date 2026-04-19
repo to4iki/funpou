@@ -22,7 +22,6 @@ impl Default for Config {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ObsidianConfig {
-    pub enabled: bool,
     pub vault_path: String,
     pub template_path: String,
     pub target_heading: String,
@@ -32,12 +31,18 @@ pub struct ObsidianConfig {
 impl Default for ObsidianConfig {
     fn default() -> Self {
         Self {
-            enabled: false,
             vault_path: String::new(),
             template_path: "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md".into(),
             target_heading: "## Memos".into(),
             entry_format: "- {{timestamp}}: {{body}}".into(),
         }
+    }
+}
+
+impl ObsidianConfig {
+    /// Returns true when vault_path is set to a non-empty value.
+    pub fn is_enabled(&self) -> bool {
+        !self.vault_path.trim().is_empty()
     }
 }
 
@@ -113,7 +118,7 @@ mod tests {
         let config = load_config(&path).unwrap();
         assert_eq!(config.timestamp_format, "%m/%d %H:%M");
         // Obsidian defaults should still apply
-        assert!(!config.obsidian.enabled);
+        assert!(!config.obsidian.is_enabled());
     }
 
     #[test]
@@ -124,7 +129,6 @@ mod tests {
             &path,
             "timestamp_format = \"%Y-%m-%d %H:%M:%S\"\n\n\
              [obsidian]\n\
-             enabled = true\n\
              vault_path = \"/tmp/vault\"\n\
              template_path = \"notes/{{date:YYYY-MM-DD}}.md\"\n\
              target_heading = \"## Quick Notes\"\n\
@@ -134,13 +138,51 @@ mod tests {
 
         let config = load_config(&path).unwrap();
         assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M:%S");
-        assert!(config.obsidian.enabled);
+        assert!(config.obsidian.is_enabled());
         assert_eq!(config.obsidian.vault_path, "/tmp/vault");
         assert_eq!(
             config.obsidian.template_path,
             "notes/{{date:YYYY-MM-DD}}.md"
         );
         assert_eq!(config.obsidian.target_heading, "## Quick Notes");
+    }
+
+    #[test]
+    fn is_enabled_false_when_vault_path_empty() {
+        let config = ObsidianConfig::default();
+        assert!(!config.is_enabled());
+    }
+
+    #[test]
+    fn is_enabled_false_when_vault_path_whitespace_only() {
+        let config = ObsidianConfig {
+            vault_path: "   ".into(),
+            ..Default::default()
+        };
+        assert!(!config.is_enabled());
+    }
+
+    #[test]
+    fn is_enabled_true_when_vault_path_set() {
+        let config = ObsidianConfig {
+            vault_path: "/path/to/vault".into(),
+            ..Default::default()
+        };
+        assert!(config.is_enabled());
+    }
+
+    #[test]
+    fn legacy_enabled_field_in_toml_is_silently_ignored() {
+        // Old config files may still have `enabled = true/false`; they must not cause parse errors.
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("config.toml");
+        std::fs::write(
+            &path,
+            "[obsidian]\nenabled = true\nvault_path = \"/tmp/vault\"\n",
+        )
+        .unwrap();
+        let config = load_config(&path).unwrap();
+        assert!(config.obsidian.is_enabled());
     }
 
     #[test]
@@ -200,7 +242,7 @@ mod tests {
         let path = dir.path().join("config.toml");
         std::fs::write(
             &path,
-            "[obsidian]\nenabled = true\nvault_path = \"~/valut/to4iki\"\n",
+            "[obsidian]\nvault_path = \"~/valut/to4iki\"\n",
         )
         .unwrap();
 

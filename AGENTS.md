@@ -23,7 +23,7 @@ TDD workflow: write tests first → make them pass → refactor.
 
 ## Design Decisions
 
-- Obsidian integration is opt-in — disabled by default, enabled via `config.toml`
+- Obsidian integration is opt-in — enabled automatically when `vault_path` is set in `config.toml`
 - Timestamp ID (`YYYYMMDDhhmmss`) — no external ID crate needed
 - Obsidian template paths use `YYYY`/`MM`/`DD` syntax, converted internally to chrono strftime
 - No TUI crate — pipe to `less` or `fzf` for scrolling

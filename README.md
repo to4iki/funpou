@@ -57,7 +57,6 @@ Config file: `~/.config/funpou/config.toml` (optional — works with zero config
 timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
-enabled = true
 vault_path = "/path/to/vault"
 template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
 target_heading = "## Memos"
