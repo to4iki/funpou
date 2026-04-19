@@ -21,6 +21,8 @@ cargo fmt     # Format
 
 TDD workflow: write tests first → make them pass → refactor.
 
+See [.claude/rules/testing.md](.claude/rules/testing.md) for test policy.
+
 ## Design Decisions
 
 - Obsidian integration is opt-in — enabled automatically when `vault_path` is set in `config.toml`
