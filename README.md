@@ -37,16 +37,24 @@ fnp clear --yes
 
 `fnp list` shows newest memos first by default. Use `-r` / `--reverse` for oldest first.
 
-## Installation
+## Install
+
+**Homebrew (macOS):**
 
 ```bash
-cargo install funpou
+brew install to4iki/tap/funpou
 ```
 
-Or install via [mise](https://mise.jdx.dev/):
+**mise:**
 
 ```bash
 mise use -g github:to4iki/funpou
+```
+
+**Cargo**
+
+```bash
+cargo install funpou
 ```
 
 ## Configuration
