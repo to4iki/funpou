@@ -263,7 +263,6 @@ mod tests {
     fn append_memo_writes_resolved_path_with_heading_and_entry() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
-        config.obsidian.enabled = true;
         config.obsidian.vault_path = dir.path().to_string_lossy().into();
         config.obsidian.template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md".into();
 

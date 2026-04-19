@@ -19,7 +19,7 @@ pub fn execute(text: Vec<String>, data_path: &Path, config: &Config) -> Result<(
     eprintln!("{display}");
 
     // Optionally append to Obsidian vault
-    if config.obsidian.enabled
+    if config.obsidian.is_enabled()
         && let Err(e) = obsidian::append_memo(&memo, config)
     {
         eprintln!("Warning: Obsidian sync failed: {e}");

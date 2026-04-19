@@ -28,14 +28,13 @@ timestamp_format = "%Y-%m-%d %H:%M:%S"
 
 ## Obsidian Integration
 
-When enabled, each memo is also appended to a file in your Obsidian vault under a specific heading.
+When `vault_path` is set, each memo is also appended to a file in your Obsidian vault under a specific heading.
 
 ### `[obsidian]` section
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `enabled` | bool | `false` | Enable Obsidian integration |
-| `vault_path` | string | `""` | Path to your Obsidian vault root (`~/` is expanded to the home directory) |
+| `vault_path` | string | `""` | Path to your Obsidian vault root — setting this enables the integration (`~/` is expanded to the home directory) |
 | `template_path` | string | `"daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"` | File path template (relative to vault) |
 | `target_heading` | string | `"## Memos"` | Markdown heading to insert under |
 | `entry_format` | string | `"- {{timestamp}}: {{body}}"` | Format for each memo line |
@@ -46,7 +45,6 @@ When enabled, each memo is also appended to a file in your Obsidian vault under 
 timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
-enabled = true
 vault_path = "~/ObsidianVault"
 template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
 target_heading = "## Memos"
