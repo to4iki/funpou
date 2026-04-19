@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.1.3](https://github.com/to4iki/funpou/compare/v0.1.2...v0.1.3) - 2026-04-19
+- ci(tagpr): fetch all remote branches so fallback detection works by @to4iki in https://github.com/to4iki/funpou/pull/20
+- docs: simplify AGENTS.md by @to4iki in https://github.com/to4iki/funpou/pull/22
+- fix(tagpr): update Cargo.lock package version on release bump by @to4iki in https://github.com/to4iki/funpou/pull/23
+
 ## [v0.1.2](https://github.com/to4iki/funpou/compare/v0.1.1...v0.1.2) - 2026-04-18
 - ci: sync Cargo.lock in tagpr PRs and auto-publish on release by @to4iki in https://github.com/to4iki/funpou/pull/12
 - feat(clear): add clear command to delete all memos with confirmation by @to4iki in https://github.com/to4iki/funpou/pull/14
