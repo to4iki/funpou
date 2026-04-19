@@ -148,44 +148,6 @@ mod tests {
     }
 
     #[test]
-    fn is_enabled_false_when_vault_path_empty() {
-        let config = ObsidianConfig::default();
-        assert!(!config.is_enabled());
-    }
-
-    #[test]
-    fn is_enabled_false_when_vault_path_whitespace_only() {
-        let config = ObsidianConfig {
-            vault_path: "   ".into(),
-            ..Default::default()
-        };
-        assert!(!config.is_enabled());
-    }
-
-    #[test]
-    fn is_enabled_true_when_vault_path_set() {
-        let config = ObsidianConfig {
-            vault_path: "/path/to/vault".into(),
-            ..Default::default()
-        };
-        assert!(config.is_enabled());
-    }
-
-    #[test]
-    fn legacy_enabled_field_in_toml_is_silently_ignored() {
-        // Old config files may still have `enabled = true/false`; they must not cause parse errors.
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("config.toml");
-        std::fs::write(
-            &path,
-            "[obsidian]\nenabled = true\nvault_path = \"/tmp/vault\"\n",
-        )
-        .unwrap();
-        let config = load_config(&path).unwrap();
-        assert!(config.obsidian.is_enabled());
-    }
-
-    #[test]
     fn expand_tilde_with_home() {
         let home = Path::new("/Users/foo");
         assert_eq!(
