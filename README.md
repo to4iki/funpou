@@ -1,5 +1,7 @@
 # funpou (分報)
 
+[![Crates.io](https://img.shields.io/crates/v/funpou.svg)](https://crates.io/crates/funpou)
+
 Quick one-line memos with automatic timestamps.
 
 ## Features
