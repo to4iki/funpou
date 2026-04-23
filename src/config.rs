@@ -202,11 +202,7 @@ mod tests {
     fn load_config_expands_tilde_in_vault_path() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.toml");
-        std::fs::write(
-            &path,
-            "[obsidian]\nvault_path = \"~/valut/to4iki\"\n",
-        )
-        .unwrap();
+        std::fs::write(&path, "[obsidian]\nvault_path = \"~/valut/to4iki\"\n").unwrap();
 
         let home = Path::new("/Users/foo");
         let config = load_config_with_home(&path, Some(home)).unwrap();

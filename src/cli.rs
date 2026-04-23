@@ -22,9 +22,9 @@ pub enum Command {
 
     /// List saved memos
     List {
-        /// Filter to memos created on this date (YYYY-MM-DD)
-        #[arg(long, value_name = "YYYY-MM-DD")]
-        date: Option<String>,
+        /// Filter to memos created today
+        #[arg(long)]
+        today: bool,
 
         /// Show only the last N memos
         #[arg(short = 'n', long)]

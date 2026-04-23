@@ -1,19 +1,11 @@
 use std::path::Path;
 
-use anyhow::{Context, Result};
+use anyhow::Result;
 use chrono::NaiveDate;
 
 use crate::config::Config;
 use crate::memo::Memo;
 use crate::storage;
-
-/// Parse a `--date` CLI value into a `NaiveDate`.
-///
-/// Accepts `YYYY-MM-DD` format.
-pub fn parse_date_filter(value: &str) -> Result<NaiveDate> {
-    NaiveDate::parse_from_str(value, "%Y-%m-%d")
-        .with_context(|| format!("Invalid date '{value}': expected YYYY-MM-DD"))
-}
 
 /// Apply date filter, limit, and reverse to a list of memos.
 ///
@@ -209,18 +201,5 @@ mod tests {
 
         let result = prepare_memos(memos, Some(target), Some(2), false);
         assert_eq!(bodies(&result), vec!["target-3", "target-2"]);
-    }
-
-    #[test]
-    fn parse_date_filter_accepts_iso_date() {
-        let date = parse_date_filter("2025-06-02").unwrap();
-        assert_eq!(date, NaiveDate::from_ymd_opt(2025, 6, 2).unwrap());
-    }
-
-    #[test]
-    fn parse_date_filter_rejects_invalid_format() {
-        assert!(parse_date_filter("2025/06/02").is_err());
-        assert!(parse_date_filter("not a date").is_err());
-        assert!(parse_date_filter("2025-13-01").is_err());
     }
 }

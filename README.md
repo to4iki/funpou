@@ -30,8 +30,8 @@ fnp list | fzf
 # Show last 10 memos
 fnp list -n 10
 
-# Filter to memos created on a specific day
-fnp list --date 2026-03-20
+# Filter to today's memos
+fnp list --today
 
 # Clear all memos (with confirmation)
 fnp clear
