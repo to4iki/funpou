@@ -30,6 +30,9 @@ fnp list | fzf
 # Show last 10 memos
 fnp list -n 10
 
+# Filter to today's memos
+fnp list --today
+
 # Clear all memos (with confirmation)
 fnp clear
 
