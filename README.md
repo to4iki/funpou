@@ -18,6 +18,10 @@ Quick one-line memos with automatic timestamps.
 # Save a memo
 fnp add fix the login bug
 
+# Or pipe text from stdin
+echo "fix the login bug" | fnp add
+pbpaste | fnp add
+
 # List all memos
 fnp list
 

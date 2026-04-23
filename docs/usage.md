@@ -2,7 +2,7 @@
 
 ## Commands
 
-### `fnp add <TEXT...>`
+### `fnp add [TEXT...]`
 
 Save a one-line memo with an automatic timestamp.
 
@@ -12,6 +12,16 @@ fnp add "refactor auth module"
 ```
 
 Multiple words are joined with spaces. Quotes are optional.
+
+When no TEXT is given and stdin is piped, the memo body is read from stdin
+(surrounding whitespace is trimmed):
+
+```sh
+echo "fix the login bug" | fnp add
+pbpaste | fnp add
+```
+
+CLI args take precedence over stdin.
 
 Output (printed to stderr):
 
