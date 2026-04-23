@@ -33,6 +33,7 @@ Default order is newest first.
 
 | Flag | Description |
 |------|-------------|
+| `--date <YYYY-MM-DD>` | Filter to memos created on this date |
 | `-n, --limit <N>` | Show only the last N memos |
 | `-r, --reverse` | Reverse order (oldest first) |
 | `--json` | Output raw JSONL for scripting |
@@ -45,6 +46,9 @@ fnp list -n 20
 
 # Oldest-first order
 fnp list -r
+
+# Memos from a specific day
+fnp list --date 2026-03-20
 
 # Raw JSON output
 fnp list --json

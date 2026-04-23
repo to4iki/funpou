@@ -22,11 +22,16 @@ fn main() -> Result<()> {
             commands::add::execute(text, &data_path, &config)?;
         }
         Command::List {
+            date,
             limit,
             reverse,
             json,
         } => {
-            commands::list::execute(&data_path, &config, limit, reverse, json)?;
+            let date = date
+                .as_deref()
+                .map(commands::list::parse_date_filter)
+                .transpose()?;
+            commands::list::execute(&data_path, &config, date, limit, reverse, json)?;
         }
         Command::Config { path } => {
             commands::config::execute(&config, &config_path, path)?;
