@@ -35,7 +35,7 @@ When `vault_path` is set, each memo is also appended to a file in your Obsidian 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `vault_path` | string | `""` | Path to your Obsidian vault root — setting this enables the integration (`~/` is expanded to the home directory) |
-| `template_path` | string | `"daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"` | File path template (relative to vault) |
+| `template_path` | string | `"daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"` | File path relative to vault — supports `{{date:...}}` placeholders or a literal path |
 | `target_heading` | string | `"## Memos"` | Markdown heading to insert under |
 | `entry_format` | string | `"- {{timestamp}}: {{body}}"` | Format for each memo line |
 
@@ -53,23 +53,14 @@ entry_format = "- {{timestamp}}: {{body}}"
 
 ### Template Path
 
-The `template_path` supports Obsidian-compatible date placeholders:
+`template_path` accepts `{{date:...}}` placeholders, or a static path with none:
 
-| Token | Resolves to | Example |
-|-------|-------------|---------|
-| `YYYY` | 4-digit year | `2026` |
-| `MM` | 2-digit month | `03` |
-| `DD` | 2-digit day | `20` |
-| `HH` | 2-digit hour (24h) | `14` |
-| `mm` | 2-digit minute | `05` |
-| `ss` | 2-digit second | `32` |
-
-Wrap tokens in `{{date:...}}`:
-
+```toml
+template_path = "daily/{{date:YYYY-MM-DD}}.md"  # → daily/2026-03-20.md
+template_path = "notes/times.md"                # static — always the same file
 ```
-daily/{{date:YYYY}}/{{date:YYYY-MM}}.md   → daily/2026/2026-03.md
-notes/{{date:YYYY-MM-DD}}.md              → notes/2026-03-20.md
-```
+
+Supported tokens: `YYYY` `MM` `DD` `HH` `mm` `ss`.
 
 ### Heading-Based Insertion
 

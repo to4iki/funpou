@@ -68,7 +68,10 @@ timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
 vault_path = "/path/to/vault"
-template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
+# Dynamic path with date placeholders:
+template_path = "daily/{{date:YYYY-MM-DD}}.md"
+# Or a static path that always appends to the same file:
+# template_path = "notes/times.md"
 target_heading = "## Memos"
 entry_format = "- {{timestamp}}: {{body}}"
 ```
