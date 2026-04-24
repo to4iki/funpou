@@ -34,16 +34,12 @@ Default order is newest first.
 | Flag | Description |
 |------|-------------|
 | `--today` | Filter to memos created today |
-| `-n, --limit <N>` | Show only the last N memos |
 | `-r, --reverse` | Reverse order (oldest first) |
 | `--json` | Output raw JSONL for scripting |
 
 Examples:
 
 ```sh
-# Last 20 memos
-fnp list -n 20
-
 # Oldest-first order
 fnp list -r
 
@@ -84,7 +80,6 @@ fnp config --path   # Print config file path only
 ```sh
 alias f="fnp add"
 alias fl="fnp list | fzf"
-alias fll="fnp list -n 20"
 ```
 
 ### fzf
