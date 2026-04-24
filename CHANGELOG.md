@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.1.4](https://github.com/to4iki/funpou/compare/v0.1.3...v0.1.4) - 2026-04-24
+- feat: add --today flag to list command by @to4iki in https://github.com/to4iki/funpou/pull/28
+- refactor: remove --limit flag from list command by @to4iki in https://github.com/to4iki/funpou/pull/30
+
 ## [v0.1.3](https://github.com/to4iki/funpou/compare/v0.1.2...v0.1.3) - 2026-04-19
 - ci(tagpr): fetch all remote branches so fallback detection works by @to4iki in https://github.com/to4iki/funpou/pull/20
 - docs: simplify AGENTS.md by @to4iki in https://github.com/to4iki/funpou/pull/22
