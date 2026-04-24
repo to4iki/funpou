@@ -26,10 +26,6 @@ pub enum Command {
         #[arg(long)]
         today: bool,
 
-        /// Show only the last N memos
-        #[arg(short = 'n', long)]
-        limit: Option<usize>,
-
         /// Reverse order (oldest first)
         #[arg(short, long)]
         reverse: bool,

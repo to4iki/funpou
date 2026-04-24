@@ -24,12 +24,11 @@ fn main() -> Result<()> {
         }
         Command::List {
             today,
-            limit,
             reverse,
             json,
         } => {
             let date = today.then(|| Local::now().date_naive());
-            commands::list::execute(&data_path, &config, date, limit, reverse, json)?;
+            commands::list::execute(&data_path, &config, date, reverse, json)?;
         }
         Command::Config { path } => {
             commands::config::execute(&config, &config_path, path)?;
