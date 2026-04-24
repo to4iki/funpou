@@ -2,16 +2,34 @@ use chrono::{DateTime, Local};
 
 /// Convert Moment.js-style date tokens to chrono strftime specifiers.
 ///
-/// Order matters: `MM`→`%m` first, then `mm`→`%M`. The uppercase pass cannot
-/// leak into the lowercase pass because `%m` contains only one `m`.
+/// Scans left-to-right consuming one token at a time. A sequential
+/// `replace` chain is unsafe here: `replace("MM","%m")` injects a literal
+/// `m` that a later `replace("mm","%M")` can re-glue with an adjacent `m`,
+/// so `"MMmm"` would collapse to `"%%Mm"` instead of `"%m%M"`.
 fn tokens_to_strftime(format: &str) -> String {
-    format
-        .replace("YYYY", "%Y")
-        .replace("MM", "%m")
-        .replace("DD", "%d")
-        .replace("HH", "%H")
-        .replace("mm", "%M")
-        .replace("ss", "%S")
+    const TOKENS: &[(&str, &str)] = &[
+        ("YYYY", "%Y"),
+        ("MM", "%m"),
+        ("DD", "%d"),
+        ("HH", "%H"),
+        ("mm", "%M"),
+        ("ss", "%S"),
+    ];
+
+    let mut result = String::with_capacity(format.len());
+    let mut i = 0;
+    while i < format.len() {
+        let rest = &format[i..];
+        if let Some((tok, sub)) = TOKENS.iter().find(|(t, _)| rest.starts_with(t)) {
+            result.push_str(sub);
+            i += tok.len();
+        } else {
+            let ch = rest.chars().next().unwrap();
+            result.push(ch);
+            i += ch.len_utf8();
+        }
+    }
+    result
 }
 
 /// Render a template by expanding `{...}` expressions.
@@ -115,5 +133,14 @@ mod tests {
         // Lowercase `mm` is minutes (%M), uppercase `MM` is month (%m).
         // Must not cross-contaminate.
         assert_eq!(render("{mm-MM}", &fixed_time(), None), "05-03");
+    }
+
+    #[test]
+    fn adjacent_mm_and_mm_do_not_cross_contaminate() {
+        // `{MMmm}` → month then minute, with no separator.
+        // A naive `replace("MM","%m").replace("mm","%M")` would corrupt this
+        // because the `m` from `%m` glues onto the next `m` before minute
+        // substitution runs.
+        assert_eq!(render("{MMmm}", &fixed_time(), None), "0305");
     }
 }
