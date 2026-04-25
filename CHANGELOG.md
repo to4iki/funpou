@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.5](https://github.com/to4iki/funpou/compare/v0.1.4...v0.1.5) - 2026-04-25
+- fix(tagpr): use postVersionCommand to sync Cargo.lock on release bump by @to4iki in https://github.com/to4iki/funpou/pull/32
+- docs: improve Obsidian template path examples and clarity by @to4iki in https://github.com/to4iki/funpou/pull/33
+- refactor(template): adopt chrono strftime + {body} for config templates by @to4iki in https://github.com/to4iki/funpou/pull/34
+- docs: clarify config format strings and {body} placeholder in AGENTS.md by @to4iki in https://github.com/to4iki/funpou/pull/36
+- chore: add cargo command permissions to Claude settings by @to4iki in https://github.com/to4iki/funpou/pull/37
+
 ## [v0.1.4](https://github.com/to4iki/funpou/compare/v0.1.3...v0.1.4) - 2026-04-24
 - feat: add --today flag to list command by @to4iki in https://github.com/to4iki/funpou/pull/28
 - refactor: remove --limit flag from list command by @to4iki in https://github.com/to4iki/funpou/pull/30
