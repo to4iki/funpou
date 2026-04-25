@@ -25,6 +25,7 @@ pub struct ObsidianConfig {
     pub vault_path: String,
     pub template_path: String,
     pub target_heading: String,
+    /// strftime format with a `{body}` placeholder for the memo text.
     pub entry_format: String,
 }
 

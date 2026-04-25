@@ -83,9 +83,7 @@ pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
         .created_at
         .format(&config.obsidian.template_path)
         .to_string();
-    let file_path: PathBuf = [&config.obsidian.vault_path, &relative_path]
-        .iter()
-        .collect();
+    let file_path = PathBuf::from(&config.obsidian.vault_path).join(&relative_path);
 
     if let Some(parent) = file_path.parent() {
         fs::create_dir_all(parent)
@@ -193,9 +191,7 @@ mod tests {
 
     #[test]
     fn format_entry_preserves_percent_in_body() {
-        // strftime runs against the template before {body} is substituted.
-        // If the order were reversed, `%Y` inside the body would be expanded
-        // to a year, mangling the user's text.
+        // Body containing %Y must survive — strftime runs first on the format string only.
         let mut config = Config::default();
         config.obsidian.entry_format = "- %Y-%m-%d: {body}".into();
         let memo = Memo {
