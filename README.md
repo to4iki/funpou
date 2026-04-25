@@ -64,16 +64,16 @@ cargo install funpou
 Config file: `~/.config/funpou/config.toml` (optional — works with zero config)
 
 ```toml
-timestamp_format = "{YYYY-MM-DD-HH:mm}"
+timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
 vault_path = "/path/to/vault"
-# Dynamic path with date tokens:
-template_path = "daily/{YYYY-MM-DD}.md"
+# Dynamic path with strftime specifiers:
+template_path = "daily/%Y-%m-%d.md"
 # Or a static path that always appends to the same file:
 # template_path = "notes/times.md"
 target_heading = "## Memos"
-entry_format = "- {YYYY-MM-DD-HH:mm}: {body}"
+entry_format = "- %Y-%m-%d %H:%M: {body}"
 ```
 
 ## Documentation

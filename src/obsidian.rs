@@ -5,15 +5,17 @@ use anyhow::{Context, Result};
 
 use crate::config::Config;
 use crate::memo::Memo;
-use crate::template;
 
-/// Format a memo entry using the configured entry format template.
+/// Format a memo entry using the configured entry format.
+///
+/// strftime is applied first so that any `%` characters in `body` cannot
+/// be misinterpreted as date specifiers — chrono passes `{` `}` through
+/// untouched, leaving `{body}` intact for the subsequent substitution.
 fn format_entry(memo: &Memo, config: &Config) -> String {
-    template::render(
-        &config.obsidian.entry_format,
-        &memo.created_at,
-        Some(&memo.body),
-    )
+    memo.created_at
+        .format(&config.obsidian.entry_format)
+        .to_string()
+        .replace("{body}", &memo.body)
 }
 
 /// Insert an entry under the target heading in the given content.
@@ -77,7 +79,10 @@ fn insert_under_heading(content: &str, heading: &str, entry: &str) -> String {
 
 /// Append a memo to the Obsidian vault file.
 pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
-    let relative_path = template::render(&config.obsidian.template_path, &memo.created_at, None);
+    let relative_path = memo
+        .created_at
+        .format(&config.obsidian.template_path)
+        .to_string();
     let file_path: PathBuf = [&config.obsidian.vault_path, &relative_path]
         .iter()
         .collect();
@@ -182,8 +187,23 @@ mod tests {
         };
         assert_eq!(
             format_entry(&memo, &config),
-            "- 2026-03-20-14:05: test memo"
+            "- 2026-03-20 14:05: test memo"
         );
+    }
+
+    #[test]
+    fn format_entry_preserves_percent_in_body() {
+        // strftime runs against the template before {body} is substituted.
+        // If the order were reversed, `%Y` inside the body would be expanded
+        // to a year, mangling the user's text.
+        let mut config = Config::default();
+        config.obsidian.entry_format = "- %Y-%m-%d: {body}".into();
+        let memo = Memo {
+            id: "20260320140532".into(),
+            body: "100% done %Y".into(),
+            created_at: fixed_time(),
+        };
+        assert_eq!(format_entry(&memo, &config), "- 2026-03-20: 100% done %Y");
     }
 
     #[test]
@@ -191,7 +211,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
         config.obsidian.vault_path = dir.path().to_string_lossy().into();
-        config.obsidian.template_path = "daily/{YYYY}/{YYYY-MM}.md".into();
+        config.obsidian.template_path = "daily/%Y/%Y-%m.md".into();
 
         let memo = Memo {
             id: "20260320140532".into(),
@@ -203,6 +223,6 @@ mod tests {
 
         let file_path = dir.path().join("daily/2026/2026-03.md");
         let content = fs::read_to_string(&file_path).unwrap();
-        assert_eq!(content, "\n## Memos\n- 2026-03-20-14:05: obsidian test\n");
+        assert_eq!(content, "\n## Memos\n- 2026-03-20 14:05: obsidian test\n");
     }
 }

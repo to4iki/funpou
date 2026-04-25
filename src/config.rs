@@ -13,7 +13,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            timestamp_format: "{YYYY-MM-DD-HH:mm}".into(),
+            timestamp_format: "%Y-%m-%d %H:%M".into(),
             obsidian: ObsidianConfig::default(),
         }
     }
@@ -32,9 +32,9 @@ impl Default for ObsidianConfig {
     fn default() -> Self {
         Self {
             vault_path: String::new(),
-            template_path: "daily/{YYYY-MM-DD}.md".into(),
+            template_path: "daily/%Y-%m-%d.md".into(),
             target_heading: "## Memos".into(),
-            entry_format: "- {YYYY-MM-DD-HH:mm}: {body}".into(),
+            entry_format: "- %Y-%m-%d %H:%M: {body}".into(),
         }
     }
 }
@@ -106,17 +106,17 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("nonexistent.toml");
         let config = load_config(&path).unwrap();
-        assert_eq!(config.timestamp_format, "{YYYY-MM-DD-HH:mm}");
+        assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M");
     }
 
     #[test]
     fn load_partial_config_merges_with_defaults() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.toml");
-        std::fs::write(&path, "timestamp_format = \"{MM/DD HH:mm}\"\n").unwrap();
+        std::fs::write(&path, "timestamp_format = \"%m/%d %H:%M\"\n").unwrap();
 
         let config = load_config(&path).unwrap();
-        assert_eq!(config.timestamp_format, "{MM/DD HH:mm}");
+        assert_eq!(config.timestamp_format, "%m/%d %H:%M");
         // Obsidian defaults should still apply
         assert!(!config.obsidian.is_enabled());
     }
@@ -127,25 +127,22 @@ mod tests {
         let path = dir.path().join("config.toml");
         std::fs::write(
             &path,
-            "timestamp_format = \"{YYYY-MM-DD HH:mm:ss}\"\n\n\
+            "timestamp_format = \"%Y-%m-%d %H:%M:%S\"\n\n\
              [obsidian]\n\
              vault_path = \"/tmp/vault\"\n\
-             template_path = \"notes/{YYYY-MM-DD}.md\"\n\
+             template_path = \"notes/%Y-%m-%d.md\"\n\
              target_heading = \"## Quick Notes\"\n\
-             entry_format = \"- {body} ({YYYY-MM-DD-HH:mm})\"\n",
+             entry_format = \"- {body} (%Y-%m-%d %H:%M)\"\n",
         )
         .unwrap();
 
         let config = load_config(&path).unwrap();
-        assert_eq!(config.timestamp_format, "{YYYY-MM-DD HH:mm:ss}");
+        assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M:%S");
         assert!(config.obsidian.is_enabled());
         assert_eq!(config.obsidian.vault_path, "/tmp/vault");
-        assert_eq!(config.obsidian.template_path, "notes/{YYYY-MM-DD}.md");
+        assert_eq!(config.obsidian.template_path, "notes/%Y-%m-%d.md");
         assert_eq!(config.obsidian.target_heading, "## Quick Notes");
-        assert_eq!(
-            config.obsidian.entry_format,
-            "- {body} ({YYYY-MM-DD-HH:mm})"
-        );
+        assert_eq!(config.obsidian.entry_format, "- {body} (%Y-%m-%d %H:%M)");
     }
 
     #[test]

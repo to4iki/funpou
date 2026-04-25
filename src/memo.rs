@@ -1,8 +1,6 @@
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 
-use crate::template;
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Memo {
     pub id: String,
@@ -20,11 +18,11 @@ impl Memo {
         }
     }
 
-    /// Format the memo for display using the given timestamp template.
+    /// Format the memo for display using the given strftime format string.
     pub fn format_display(&self, timestamp_format: &str) -> String {
         format!(
             "{}: {}",
-            template::render(timestamp_format, &self.created_at, None),
+            self.created_at.format(timestamp_format),
             self.body
         )
     }
@@ -52,8 +50,8 @@ mod tests {
             created_at: Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap(),
         };
         assert_eq!(
-            memo.format_display("{YYYY-MM-DD-HH:mm}"),
-            "2026-03-20-14:05: display test"
+            memo.format_display("%Y-%m-%d %H:%M"),
+            "2026-03-20 14:05: display test"
         );
     }
 }

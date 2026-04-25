@@ -4,7 +4,6 @@ mod config;
 mod memo;
 mod obsidian;
 mod storage;
-mod template;
 
 use anyhow::Result;
 use chrono::Local;

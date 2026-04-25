@@ -15,37 +15,21 @@ fnp config --path
 
 ## Template Syntax
 
-All format strings (`timestamp_format`, `template_path`, `entry_format`) share a single template syntax:
+Date/time formatting uses [chrono strftime](https://docs.rs/chrono/latest/chrono/format/strftime/index.html) directly. Common specifiers: `%Y` (year), `%m` (month), `%d` (day), `%H` (hour), `%M` (minute), `%S` (second).
 
-- `{...}` — expanded when rendering
-- Anything outside braces — copied verbatim
-- Unclosed `{` — kept literal
-
-Inside `{...}`:
-
-| Token | Meaning |
-|-------|---------|
-| `YYYY` | 4-digit year |
-| `MM`   | 2-digit month |
-| `DD`   | 2-digit day |
-| `HH`   | 2-digit hour (24h) |
-| `mm`   | 2-digit minute |
-| `ss`   | 2-digit second |
-| `body` | Memo text (valid only in `entry_format`) |
-
-Tokens may appear together with literal characters, e.g. `{YYYY-MM-DD-HH:mm}` → `2026-03-20-14:05`.
+`entry_format` additionally supports a single `{body}` placeholder for the memo text. strftime is applied first, so any `%` in the memo body is preserved untouched.
 
 ## Options
 
 ### `timestamp_format`
 
-Template for the timestamp shown in `fnp add` / `fnp list` output.
+strftime format string for the timestamp shown in `fnp add` / `fnp list` output.
 
 - **Type:** String
-- **Default:** `"{YYYY-MM-DD-HH:mm}"`
+- **Default:** `"%Y-%m-%d %H:%M"`
 
 ```toml
-timestamp_format = "{YYYY-MM-DD HH:mm:ss}"
+timestamp_format = "%Y-%m-%d %H:%M:%S"
 ```
 
 ## Obsidian Integration
@@ -57,29 +41,29 @@ When `vault_path` is set, each memo is also appended to a file in your Obsidian 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `vault_path` | string | `""` | Path to your Obsidian vault root — setting this enables the integration (`~/` is expanded to the home directory) |
-| `template_path` | string | `"daily/{YYYY-MM-DD}.md"` | File path relative to vault — supports date tokens or a literal path |
+| `template_path` | string | `"daily/%Y-%m-%d.md"` | File path relative to vault — strftime specifiers or a literal path |
 | `target_heading` | string | `"## Memos"` | Markdown heading to insert under |
-| `entry_format` | string | `"- {YYYY-MM-DD-HH:mm}: {body}"` | Template for each memo line; `{body}` is the memo text |
+| `entry_format` | string | `"- %Y-%m-%d %H:%M: {body}"` | Format for each memo line; `{body}` is replaced with the memo text |
 
 ### Full example
 
 ```toml
-timestamp_format = "{YYYY-MM-DD-HH:mm}"
+timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
 vault_path = "~/ObsidianVault"
-template_path = "daily/{YYYY-MM-DD}.md"
+template_path = "daily/%Y-%m-%d.md"
 target_heading = "## Memos"
-entry_format = "- {YYYY-MM-DD-HH:mm}: {body}"
+entry_format = "- %Y-%m-%d %H:%M: {body}"
 ```
 
 ### Template Path
 
-`template_path` accepts date tokens or a static path:
+`template_path` accepts strftime specifiers or a static path:
 
 ```toml
-template_path = "daily/{YYYY-MM-DD}.md"  # → daily/2026-03-20.md
-template_path = "notes/times.md"         # static — always the same file
+template_path = "daily/%Y-%m-%d.md"  # → daily/2026-03-20.md
+template_path = "notes/times.md"     # static — always the same file
 ```
 
 ### Heading-Based Insertion
@@ -88,8 +72,8 @@ Memos are inserted just before the next heading of equal or higher level:
 
 ```markdown
 ## Memos
-- 2026-03-20-14:00: existing memo
-- 2026-03-20-14:05: new memo       ← inserted here
+- 2026-03-20 14:00: existing memo
+- 2026-03-20 14:05: new memo       ← inserted here
 
 ## Other Section
 ```
@@ -98,7 +82,7 @@ If the heading does not exist, it is appended to the end of the file. If the fil
 
 ### Entry Format
 
-`entry_format` uses the same template syntax. `{body}` is replaced with the memo text; date tokens resolve against the memo timestamp. Unlike `timestamp_format`, `{body}` is only meaningful here — elsewhere it expands to an empty string.
+`entry_format` is rendered in two passes: strftime is applied first against the memo timestamp, then `{body}` is replaced with the memo text. This order means a `%` character inside the body is never reinterpreted as a strftime specifier. `{body}` is meaningful only here — elsewhere it stays as a literal `{body}` string.
 
 ### Error Handling
 
