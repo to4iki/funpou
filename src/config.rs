@@ -25,6 +25,7 @@ pub struct ObsidianConfig {
     pub vault_path: String,
     pub template_path: String,
     pub target_heading: String,
+    /// strftime format with a `{body}` placeholder for the memo text.
     pub entry_format: String,
 }
 
@@ -32,9 +33,9 @@ impl Default for ObsidianConfig {
     fn default() -> Self {
         Self {
             vault_path: String::new(),
-            template_path: "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md".into(),
+            template_path: "daily/%Y-%m-%d.md".into(),
             target_heading: "## Memos".into(),
-            entry_format: "- {{timestamp}}: {{body}}".into(),
+            entry_format: "- %Y-%m-%d %H:%M: {body}".into(),
         }
     }
 }
@@ -130,9 +131,9 @@ mod tests {
             "timestamp_format = \"%Y-%m-%d %H:%M:%S\"\n\n\
              [obsidian]\n\
              vault_path = \"/tmp/vault\"\n\
-             template_path = \"notes/{{date:YYYY-MM-DD}}.md\"\n\
+             template_path = \"notes/%Y-%m-%d.md\"\n\
              target_heading = \"## Quick Notes\"\n\
-             entry_format = \"- {{body}} ({{timestamp}})\"\n",
+             entry_format = \"- {body} (%Y-%m-%d %H:%M)\"\n",
         )
         .unwrap();
 
@@ -140,11 +141,9 @@ mod tests {
         assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M:%S");
         assert!(config.obsidian.is_enabled());
         assert_eq!(config.obsidian.vault_path, "/tmp/vault");
-        assert_eq!(
-            config.obsidian.template_path,
-            "notes/{{date:YYYY-MM-DD}}.md"
-        );
+        assert_eq!(config.obsidian.template_path, "notes/%Y-%m-%d.md");
         assert_eq!(config.obsidian.target_heading, "## Quick Notes");
+        assert_eq!(config.obsidian.entry_format, "- {body} (%Y-%m-%d %H:%M)");
     }
 
     #[test]
@@ -202,11 +201,7 @@ mod tests {
     fn load_config_expands_tilde_in_vault_path() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("config.toml");
-        std::fs::write(
-            &path,
-            "[obsidian]\nvault_path = \"~/valut/to4iki\"\n",
-        )
-        .unwrap();
+        std::fs::write(&path, "[obsidian]\nvault_path = \"~/valut/to4iki\"\n").unwrap();
 
         let home = Path::new("/Users/foo");
         let config = load_config_with_home(&path, Some(home)).unwrap();

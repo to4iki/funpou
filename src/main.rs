@@ -8,6 +8,7 @@ mod storage;
 use std::io::{IsTerminal, Read};
 
 use anyhow::Result;
+use chrono::Local;
 use clap::Parser;
 
 use cli::{Cli, Command};
@@ -32,11 +33,12 @@ fn main() -> Result<()> {
             commands::add::execute(text, stdin_body, &data_path, &config)?;
         }
         Command::List {
-            limit,
+            today,
             reverse,
             json,
         } => {
-            commands::list::execute(&data_path, &config, limit, reverse, json)?;
+            let date = today.then(|| Local::now().date_naive());
+            commands::list::execute(&data_path, &config, date, reverse, json)?;
         }
         Command::Config { path } => {
             commands::config::execute(&config, &config_path, path)?;

@@ -13,11 +13,17 @@ fnp config
 fnp config --path
 ```
 
+## Template Syntax
+
+Date/time formatting uses [chrono strftime](https://docs.rs/chrono/latest/chrono/format/strftime/index.html) directly. Common specifiers: `%Y` (year), `%m` (month), `%d` (day), `%H` (hour), `%M` (minute), `%S` (second).
+
+`entry_format` additionally supports a single `{body}` placeholder for the memo text. strftime is applied first, so any `%` in the memo body is preserved untouched.
+
 ## Options
 
 ### `timestamp_format`
 
-Display format for timestamps using [strftime](https://docs.rs/chrono/latest/chrono/format/strftime/index.html) syntax.
+strftime format string for the timestamp shown in `fnp add` / `fnp list` output.
 
 - **Type:** String
 - **Default:** `"%Y-%m-%d %H:%M"`
@@ -35,9 +41,9 @@ When `vault_path` is set, each memo is also appended to a file in your Obsidian 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `vault_path` | string | `""` | Path to your Obsidian vault root — setting this enables the integration (`~/` is expanded to the home directory) |
-| `template_path` | string | `"daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"` | File path template (relative to vault) |
+| `template_path` | string | `"daily/%Y-%m-%d.md"` | File path relative to vault — strftime specifiers or a literal path |
 | `target_heading` | string | `"## Memos"` | Markdown heading to insert under |
-| `entry_format` | string | `"- {{timestamp}}: {{body}}"` | Format for each memo line |
+| `entry_format` | string | `"- %Y-%m-%d %H:%M: {body}"` | Format for each memo line; `{body}` is replaced with the memo text |
 
 ### Full example
 
@@ -46,29 +52,18 @@ timestamp_format = "%Y-%m-%d %H:%M"
 
 [obsidian]
 vault_path = "~/ObsidianVault"
-template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md"
+template_path = "daily/%Y-%m-%d.md"
 target_heading = "## Memos"
-entry_format = "- {{timestamp}}: {{body}}"
+entry_format = "- %Y-%m-%d %H:%M: {body}"
 ```
 
 ### Template Path
 
-The `template_path` supports Obsidian-compatible date placeholders:
+`template_path` accepts strftime specifiers or a static path:
 
-| Token | Resolves to | Example |
-|-------|-------------|---------|
-| `YYYY` | 4-digit year | `2026` |
-| `MM` | 2-digit month | `03` |
-| `DD` | 2-digit day | `20` |
-| `HH` | 2-digit hour (24h) | `14` |
-| `mm` | 2-digit minute | `05` |
-| `ss` | 2-digit second | `32` |
-
-Wrap tokens in `{{date:...}}`:
-
-```
-daily/{{date:YYYY}}/{{date:YYYY-MM}}.md   → daily/2026/2026-03.md
-notes/{{date:YYYY-MM-DD}}.md              → notes/2026-03-20.md
+```toml
+template_path = "daily/%Y-%m-%d.md"  # → daily/2026-03-20.md
+template_path = "notes/times.md"     # static — always the same file
 ```
 
 ### Heading-Based Insertion
@@ -87,12 +82,7 @@ If the heading does not exist, it is appended to the end of the file. If the fil
 
 ### Entry Format
 
-The `entry_format` string supports these placeholders:
-
-| Placeholder | Replaced with |
-|-------------|---------------|
-| `{{timestamp}}` | Formatted timestamp (using `timestamp_format`) |
-| `{{body}}` | Memo text |
+`entry_format` is rendered in two passes: strftime is applied first against the memo timestamp, then `{body}` is replaced with the memo text. This order means a `%` character inside the body is never reinterpreted as a strftime specifier. `{body}` is meaningful only here — elsewhere it stays as a literal `{body}` string.
 
 ### Error Handling
 

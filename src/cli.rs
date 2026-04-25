@@ -25,9 +25,9 @@ pub enum Command {
 
     /// List saved memos
     List {
-        /// Show only the last N memos
-        #[arg(short = 'n', long)]
-        limit: Option<usize>,
+        /// Filter to memos created today
+        #[arg(long)]
+        today: bool,
 
         /// Reverse order (oldest first)
         #[arg(short, long)]
