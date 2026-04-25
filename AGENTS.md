@@ -27,5 +27,5 @@ See [.claude/rules/testing.md](.claude/rules/testing.md) for test policy.
 
 - Obsidian integration is opt-in — enabled automatically when `vault_path` is set in `config.toml`
 - Timestamp ID (`YYYYMMDDhhmmss`) — no external ID crate needed
-- Obsidian template paths use `YYYY`/`MM`/`DD` syntax, converted internally to chrono strftime
+- Config format strings use chrono strftime directly (`%Y-%m-%d %H:%M`); `entry_format` additionally accepts `{body}` as a placeholder for the memo text
 - No TUI crate — pipe to `less` or `fzf` for scrolling
