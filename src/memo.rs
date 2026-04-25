@@ -18,7 +18,7 @@ impl Memo {
         }
     }
 
-    /// Format the memo for display using the given timestamp format.
+    /// Format the memo for display using the given strftime format string.
     pub fn format_display(&self, timestamp_format: &str) -> String {
         format!(
             "{}: {}",

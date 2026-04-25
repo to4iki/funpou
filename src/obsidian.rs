@@ -2,60 +2,20 @@ use std::fs;
 use std::path::PathBuf;
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Local};
 
 use crate::config::Config;
 use crate::memo::Memo;
 
-/// Convert Obsidian-style date tokens to chrono strftime specifiers.
-///
-/// Supported tokens: YYYY, MM, DD, HH, mm, ss
-fn obsidian_to_strftime(format: &str) -> String {
-    format
-        .replace("YYYY", "%Y")
-        .replace("MM", "%m")
-        .replace("DD", "%d")
-        .replace("HH", "%H")
-        .replace("mm", "%M")
-        .replace("ss", "%S")
-}
-
-/// Resolve template path by replacing `{{date:FORMAT}}` placeholders.
-pub fn resolve_template_path(template: &str, now: &DateTime<Local>) -> String {
-    let mut result = String::with_capacity(template.len());
-    let mut remaining = template;
-
-    while let Some(start) = remaining.find("{{date:") {
-        result.push_str(&remaining[..start]);
-        let after_prefix = &remaining[start + 7..]; // skip "{{date:"
-
-        if let Some(end) = after_prefix.find("}}") {
-            let obsidian_format = &after_prefix[..end];
-            let strftime_format = obsidian_to_strftime(obsidian_format);
-            result.push_str(&now.format(&strftime_format).to_string());
-            remaining = &after_prefix[end + 2..]; // skip "}}"
-        } else {
-            // Unclosed placeholder — keep "{{date:" as a literal and continue.
-            // (The prefix before `start` was already pushed above.)
-            result.push_str("{{date:");
-            remaining = after_prefix;
-        }
-    }
-
-    result.push_str(remaining);
-    result
-}
-
 /// Format a memo entry using the configured entry format.
+///
+/// strftime is applied first so that any `%` characters in `body` cannot
+/// be misinterpreted as date specifiers — chrono passes `{` `}` through
+/// untouched, leaving `{body}` intact for the subsequent substitution.
 fn format_entry(memo: &Memo, config: &Config) -> String {
-    config
-        .obsidian
-        .entry_format
-        .replace(
-            "{{timestamp}}",
-            &memo.created_at.format(&config.timestamp_format).to_string(),
-        )
-        .replace("{{body}}", &memo.body)
+    memo.created_at
+        .format(&config.obsidian.entry_format)
+        .to_string()
+        .replace("{body}", &memo.body)
 }
 
 /// Insert an entry under the target heading in the given content.
@@ -119,11 +79,11 @@ fn insert_under_heading(content: &str, heading: &str, entry: &str) -> String {
 
 /// Append a memo to the Obsidian vault file.
 pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
-    let now = memo.created_at;
-    let relative_path = resolve_template_path(&config.obsidian.template_path, &now);
-    let file_path: PathBuf = [&config.obsidian.vault_path, &relative_path]
-        .iter()
-        .collect();
+    let relative_path = memo
+        .created_at
+        .format(&config.obsidian.template_path)
+        .to_string();
+    let file_path = PathBuf::from(&config.obsidian.vault_path).join(&relative_path);
 
     if let Some(parent) = file_path.parent() {
         fs::create_dir_all(parent)
@@ -150,40 +110,10 @@ pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
+    use chrono::{DateTime, Local, TimeZone};
 
     fn fixed_time() -> DateTime<Local> {
         Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap()
-    }
-
-    #[test]
-    fn obsidian_to_strftime_converts_all_tokens() {
-        assert_eq!(obsidian_to_strftime("YYYY-MM-DD"), "%Y-%m-%d");
-        assert_eq!(obsidian_to_strftime("HH:mm:ss"), "%H:%M:%S");
-        assert_eq!(obsidian_to_strftime("YYYY"), "%Y");
-    }
-
-    #[test]
-    fn resolve_template_path_substitutes_date_tokens() {
-        let now = fixed_time();
-        let result = resolve_template_path("daily/{{date:YYYY}}/{{date:YYYY-MM}}.md", &now);
-        assert_eq!(result, "daily/2026/2026-03.md");
-    }
-
-    #[test]
-    fn resolve_template_path_no_placeholders() {
-        let now = fixed_time();
-        let result = resolve_template_path("plain/path.md", &now);
-        assert_eq!(result, "plain/path.md");
-    }
-
-    #[test]
-    fn resolve_template_path_preserves_unclosed_placeholder() {
-        // A malformed template (missing `}}`) must not corrupt the path
-        // by duplicating the prefix or expanding to garbage — keep it literal.
-        let now = fixed_time();
-        let result = resolve_template_path("daily/{{date:YYYY}}/{{date:bad", &now);
-        assert_eq!(result, "daily/2026/{{date:bad");
     }
 
     #[test]
@@ -260,11 +190,24 @@ mod tests {
     }
 
     #[test]
+    fn format_entry_preserves_percent_in_body() {
+        // Body containing %Y must survive — strftime runs first on the format string only.
+        let mut config = Config::default();
+        config.obsidian.entry_format = "- %Y-%m-%d: {body}".into();
+        let memo = Memo {
+            id: "20260320140532".into(),
+            body: "100% done %Y".into(),
+            created_at: fixed_time(),
+        };
+        assert_eq!(format_entry(&memo, &config), "- 2026-03-20: 100% done %Y");
+    }
+
+    #[test]
     fn append_memo_writes_resolved_path_with_heading_and_entry() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
         config.obsidian.vault_path = dir.path().to_string_lossy().into();
-        config.obsidian.template_path = "daily/{{date:YYYY}}/{{date:YYYY-MM}}.md".into();
+        config.obsidian.template_path = "daily/%Y/%Y-%m.md".into();
 
         let memo = Memo {
             id: "20260320140532".into(),
