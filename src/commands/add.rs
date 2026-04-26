@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn resolve_body_uses_stdin_when_no_args() {
-        let body = resolve_body(&[], Some("from pipe\n".into())).unwrap();
+        let body = resolve_body(&[], Some("from pipe".into())).unwrap();
         assert_eq!(body, "from pipe");
     }
 
@@ -83,23 +83,13 @@ mod tests {
     #[test]
     fn resolve_body_errors_without_args_or_stdin() {
         assert!(resolve_body(&[], None).is_err());
-    }
-
-    #[test]
-    fn resolve_body_errors_on_whitespace_only_stdin() {
         assert!(resolve_body(&[], Some("   \n\t\n".into())).is_err());
     }
 
     #[test]
-    fn resolve_body_trims_surrounding_whitespace_from_stdin() {
-        let body = resolve_body(&[], Some("  padded text  \n".into())).unwrap();
-        assert_eq!(body, "padded text");
-    }
-
-    #[test]
-    fn resolve_body_preserves_internal_newlines_from_stdin() {
-        // Only surrounding whitespace is trimmed; internal newlines are kept verbatim.
-        let body = resolve_body(&[], Some("line1\nline2\n".into())).unwrap();
+    fn resolve_body_only_trims_surrounding_whitespace_from_stdin() {
+        // Surrounding whitespace is trimmed; internal newlines are kept verbatim.
+        let body = resolve_body(&[], Some("  line1\nline2  \n".into())).unwrap();
         assert_eq!(body, "line1\nline2");
     }
 }
