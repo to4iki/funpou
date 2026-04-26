@@ -14,9 +14,12 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     /// Save a one-line memo with an automatic timestamp
+    ///
+    /// Reads from stdin when no TEXT is given and stdin is piped,
+    /// e.g. `echo "note" | fnp add` or `pbpaste | fnp add`.
     Add {
         /// Memo text (multiple words are joined with spaces)
-        #[arg(required = true, num_args = 1..)]
+        #[arg(num_args = 1..)]
         text: Vec<String>,
     },
 

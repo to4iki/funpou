@@ -5,6 +5,8 @@ mod memo;
 mod obsidian;
 mod storage;
 
+use std::io::{IsTerminal, Read};
+
 use anyhow::Result;
 use chrono::Local;
 use clap::Parser;
@@ -20,7 +22,15 @@ fn main() -> Result<()> {
 
     match cli.command {
         Command::Add { text } => {
-            commands::add::execute(text, &data_path, &config)?;
+            // When no args are given and stdin is piped, read the memo body from stdin
+            let stdin_body = if text.is_empty() && !std::io::stdin().is_terminal() {
+                let mut buf = String::new();
+                std::io::stdin().read_to_string(&mut buf)?;
+                Some(buf)
+            } else {
+                None
+            };
+            commands::add::execute(text, stdin_body, &data_path, &config)?;
         }
         Command::List {
             today,
