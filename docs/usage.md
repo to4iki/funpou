@@ -21,7 +21,9 @@ echo "fix the login bug" | fnp add
 pbpaste | fnp add
 ```
 
-CLI args take precedence over stdin.
+CLI args take precedence over stdin. Internal newlines in piped input are
+preserved verbatim, so multi-line input is stored as-is — funpou is designed
+for one-line memos, prefer single-line stdin.
 
 Output (printed to stderr):
 

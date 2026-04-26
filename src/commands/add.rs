@@ -20,11 +20,13 @@ pub fn resolve_body(text: &[String], stdin: Option<String>) -> Result<String> {
         Some(s) => {
             let trimmed = s.trim();
             if trimmed.is_empty() {
-                bail!("No memo text provided (stdin was empty)");
+                bail!("No memo text provided (stdin was empty). See `fnp add --help`.");
             }
             Ok(trimmed.to_string())
         }
-        None => bail!("No memo text provided"),
+        None => {
+            bail!("No memo text provided. Pass TEXT args or pipe via stdin. See `fnp add --help`.")
+        }
     }
 }
 
@@ -92,5 +94,12 @@ mod tests {
     fn resolve_body_trims_surrounding_whitespace_from_stdin() {
         let body = resolve_body(&[], Some("  padded text  \n".into())).unwrap();
         assert_eq!(body, "padded text");
+    }
+
+    #[test]
+    fn resolve_body_preserves_internal_newlines_from_stdin() {
+        // Only surrounding whitespace is trimmed; internal newlines are kept verbatim.
+        let body = resolve_body(&[], Some("line1\nline2\n".into())).unwrap();
+        assert_eq!(body, "line1\nline2");
     }
 }
