@@ -1,15 +1,8 @@
-mod cli;
-mod commands;
-mod config;
-mod memo;
-mod obsidian;
-mod storage;
-
 use anyhow::Result;
 use chrono::Local;
 use clap::Parser;
-
-use cli::{Cli, Command};
+use funpou::cli::{Cli, Command};
+use funpou::{commands, config, storage};
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
