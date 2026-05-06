@@ -50,7 +50,6 @@ pub fn clear_all(path: &Path) -> Result<()> {
 }
 
 /// Read all memos from the JSONL file.
-/// Silently skips malformed lines.
 pub fn read_all(path: &Path) -> Result<Vec<Memo>> {
     if !path.exists() {
         return Ok(Vec::new());
@@ -60,12 +59,28 @@ pub fn read_all(path: &Path) -> Result<Vec<Memo>> {
         fs::File::open(path).with_context(|| format!("Failed to open file: {}", path.display()))?;
     let reader = BufReader::new(file);
 
-    let memos: Vec<Memo> = reader
-        .lines()
-        .map_while(Result::ok)
-        .filter(|line| !line.trim().is_empty())
-        .filter_map(|line| serde_json::from_str(&line).ok())
-        .collect();
+    let mut memos = Vec::new();
+    for (index, line) in reader.lines().enumerate() {
+        let line_number = index + 1;
+        let line = line.with_context(|| {
+            format!(
+                "Failed to read memo file line {line_number}: {}",
+                path.display()
+            )
+        })?;
+
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        let memo = serde_json::from_str(&line).with_context(|| {
+            format!(
+                "Failed to parse memo file line {line_number}: {}",
+                path.display()
+            )
+        })?;
+        memos.push(memo);
+    }
 
     Ok(memos)
 }
@@ -120,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn read_all_skips_malformed_lines() {
+    fn read_all_errors_on_malformed_lines() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("memos.jsonl");
 
@@ -131,9 +146,8 @@ mod tests {
         let mut file = OpenOptions::new().append(true).open(&path).unwrap();
         writeln!(file, "{{not valid json}}").unwrap();
 
-        let memos = read_all(&path).unwrap();
-        assert_eq!(memos.len(), 1);
-        assert_eq!(memos[0].body, "valid memo");
+        let err = read_all(&path).unwrap_err();
+        assert!(err.to_string().contains("line 2"));
     }
 
     #[test]
