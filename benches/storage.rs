@@ -22,8 +22,8 @@ fn bench_append_memo(c: &mut Criterion) {
 
     c.bench_function("append_memo", |b| {
         b.iter_batched(
-            || NamedTempFile::new().unwrap(),
-            |file| storage::append_memo(file.path(), black_box(&memo)).unwrap(),
+            || NamedTempFile::new().unwrap().into_temp_path(),
+            |path| storage::append_memo(path.as_ref(), black_box(&memo)).unwrap(),
             BatchSize::SmallInput,
         );
     });

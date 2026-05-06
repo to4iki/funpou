@@ -17,6 +17,7 @@ funpou is a Rust CLI for quick one-line memos with automatic timestamps and opti
 cargo test    # Run all tests
 cargo clippy  # Lint
 cargo fmt     # Format
+cargo bench --bench storage  # Run storage benchmarks
 ```
 
 TDD workflow: write tests first → make them pass → refactor.
