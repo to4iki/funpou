@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.1.6](https://github.com/to4iki/funpou/compare/v0.1.5...v0.1.6) - 2026-05-06
+- Add Criterion benchmarks by @to4iki in https://github.com/to4iki/funpou/pull/38
+- Fix Criterion benchmark temp file exhaustion by @to4iki in https://github.com/to4iki/funpou/pull/40
+- Fix review findings for packaging and storage safety by @to4iki in https://github.com/to4iki/funpou/pull/41
+
 ## [v0.1.5](https://github.com/to4iki/funpou/compare/v0.1.4...v0.1.5) - 2026-04-25
 - fix(tagpr): use postVersionCommand to sync Cargo.lock on release bump by @to4iki in https://github.com/to4iki/funpou/pull/32
 - docs: improve Obsidian template path examples and clarity by @to4iki in https://github.com/to4iki/funpou/pull/33
