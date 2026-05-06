@@ -1,7 +1,7 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Component, Path, PathBuf};
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 
 use crate::config::Config;
 use crate::memo::Memo;
@@ -77,13 +77,31 @@ fn insert_under_heading(content: &str, heading: &str, entry: &str) -> String {
     }
 }
 
-/// Append a memo to the Obsidian vault file.
-pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
+fn resolve_template_path(memo: &Memo, config: &Config) -> Result<PathBuf> {
     let relative_path = memo
         .created_at
         .format(&config.obsidian.template_path)
         .to_string();
-    let file_path = PathBuf::from(&config.obsidian.vault_path).join(&relative_path);
+    let relative_path = Path::new(&relative_path);
+
+    if relative_path.components().any(|component| {
+        matches!(
+            component,
+            Component::ParentDir | Component::RootDir | Component::Prefix(_)
+        )
+    }) {
+        bail!(
+            "Obsidian template_path must stay inside the vault: {}",
+            config.obsidian.template_path
+        );
+    }
+
+    Ok(PathBuf::from(&config.obsidian.vault_path).join(relative_path))
+}
+
+/// Append a memo to the Obsidian vault file.
+pub fn append_memo(memo: &Memo, config: &Config) -> Result<()> {
+    let file_path = resolve_template_path(memo, config)?;
 
     if let Some(parent) = file_path.parent() {
         fs::create_dir_all(parent)
@@ -220,5 +238,41 @@ mod tests {
         let file_path = dir.path().join("daily/2026/2026-03.md");
         let content = fs::read_to_string(&file_path).unwrap();
         assert_eq!(content, "\n## Memos\n- 2026-03-20 14:05: obsidian test\n");
+    }
+
+    #[test]
+    fn resolve_template_path_rejects_absolute_path() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut config = Config::default();
+        config.obsidian.vault_path = dir.path().to_string_lossy().into();
+        config.obsidian.template_path = "/tmp/funpou-outside.md".into();
+
+        let memo = Memo {
+            id: "20260320140532".into(),
+            body: "obsidian test".into(),
+            created_at: fixed_time(),
+        };
+
+        let err = resolve_template_path(&memo, &config).unwrap_err();
+        assert!(err.to_string().contains("must stay inside the vault"));
+    }
+
+    #[test]
+    fn append_memo_rejects_parent_dir_escape() {
+        let dir = tempfile::tempdir().unwrap();
+        let vault_path = dir.path().join("vault");
+        let mut config = Config::default();
+        config.obsidian.vault_path = vault_path.to_string_lossy().into();
+        config.obsidian.template_path = "../outside.md".into();
+
+        let memo = Memo {
+            id: "20260320140532".into(),
+            body: "obsidian test".into(),
+            created_at: fixed_time(),
+        };
+
+        let err = append_memo(&memo, &config).unwrap_err();
+        assert!(err.to_string().contains("must stay inside the vault"));
+        assert!(!dir.path().join("outside.md").exists());
     }
 }
