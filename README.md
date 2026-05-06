@@ -81,13 +81,6 @@ entry_format = "- %Y-%m-%d %H:%M: {body}"
 - [Configuration](docs/configuration.md) — All config options and Obsidian setup
 - [Usage](docs/usage.md) — Commands, flags, and shell integration
 
-## Development
-
-```sh
-cargo test
-cargo bench --bench storage
-```
-
 ## License
 
 MIT
