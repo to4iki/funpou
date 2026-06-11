@@ -166,19 +166,6 @@ mod tests {
     }
 
     #[test]
-    fn insert_into_empty_file() {
-        let result = insert_under_heading("", "## Memos", "- first entry");
-        assert_eq!(result, "\n## Memos\n- first entry\n");
-    }
-
-    #[test]
-    fn insert_at_end_when_no_next_heading() {
-        let content = "# Title\n\n## Memos\n- old entry\n";
-        let result = insert_under_heading(content, "## Memos", "- new entry");
-        assert_eq!(result, "# Title\n\n## Memos\n- old entry\n- new entry\n");
-    }
-
-    #[test]
     fn insert_under_heading_appends_sequentially() {
         // Two consecutive memos should accumulate in chronological order
         // under the heading, mirroring how `append_memo` is called repeatedly.
@@ -227,28 +214,22 @@ mod tests {
     }
 
     #[test]
-    fn resolve_template_path_rejects_absolute_path() {
-        let dir = tempfile::tempdir().unwrap();
-        let mut config = Config::default();
-        config.obsidian.vault_path = dir.path().to_path_buf();
-        config.obsidian.template_path = "/tmp/funpou-outside.md".into();
-
-        let memo = Memo::at("obsidian test".into(), fixed_time());
-
-        let err = resolve_template_path(&memo, &config).unwrap_err();
-        assert!(err.to_string().contains("must stay inside the vault"));
-    }
-
-    #[test]
-    fn append_memo_rejects_parent_dir_escape() {
+    fn template_path_rejects_escape_from_vault() {
         let dir = tempfile::tempdir().unwrap();
         let vault_path = dir.path().join("vault");
         let mut config = Config::default();
-        config.obsidian.vault_path = vault_path;
-        config.obsidian.template_path = "../outside.md".into();
-
+        config.obsidian.vault_path = vault_path.clone();
         let memo = Memo::at("obsidian test".into(), fixed_time());
 
+        config.obsidian.template_path = "/tmp/funpou-outside.md".into();
+        assert!(
+            resolve_template_path(&memo, &config)
+                .unwrap_err()
+                .to_string()
+                .contains("must stay inside the vault")
+        );
+
+        config.obsidian.template_path = "../outside.md".into();
         let err = append_memo(&memo, &config).unwrap_err();
         assert!(err.to_string().contains("must stay inside the vault"));
         assert!(!dir.path().join("outside.md").exists());

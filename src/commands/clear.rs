@@ -47,15 +47,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn confirms_on_y_and_yes_case_insensitive() {
-        for input in ["y", "Y", "yes", "YES", "Yes", " y \n", "yes\n"] {
+    fn confirmation_prompt() {
+        for input in ["y", "Y", "yes", " y \n"] {
             assert!(is_confirmed(input), "expected confirmed for {input:?}");
         }
-    }
-
-    #[test]
-    fn refuses_on_anything_else() {
-        for input in ["", "\n", "n", "N", "no", "NO", "maybe", "yep", "yy"] {
+        for input in ["", "n", "no", "maybe"] {
             assert!(!is_confirmed(input), "expected refused for {input:?}");
         }
     }

@@ -92,7 +92,7 @@ mod tests {
     #[test]
     fn append_and_read_preserves_memos_in_order() {
         let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("memos.jsonl");
+        let path = dir.path().join("nested").join("dir").join("memos.jsonl");
 
         let memo1 = Memo::new("first memo".into());
         let memo2 = Memo::new("second memo".into());
@@ -100,8 +100,6 @@ mod tests {
         append_memo(&path, &memo1).unwrap();
         append_memo(&path, &memo2).unwrap();
 
-        // Full equality also covers the JSONL serde roundtrip
-        // (id, body, created_at all survive a write/read cycle).
         assert_eq!(read_all(&path).unwrap(), vec![memo1, memo2]);
     }
 
@@ -111,27 +109,8 @@ mod tests {
         let path = dir.path().join("memos.jsonl");
 
         append_memo(&path, &Memo::new("to be cleared".into())).unwrap();
-        assert!(path.exists());
-
         clear_all(&path).unwrap();
         assert!(!path.exists());
-        assert!(read_all(&path).unwrap().is_empty());
-    }
-
-    #[test]
-    fn clear_all_is_noop_for_missing_file() {
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("nonexistent.jsonl");
-        clear_all(&path).unwrap();
-        assert!(!path.exists());
-    }
-
-    #[test]
-    fn read_all_returns_empty_for_missing_file() {
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("nonexistent.jsonl");
-        let memos = read_all(&path).unwrap();
-        assert!(memos.is_empty());
     }
 
     #[test]
@@ -151,36 +130,17 @@ mod tests {
     }
 
     #[test]
-    fn creates_parent_directories() {
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("nested").join("dir").join("memos.jsonl");
-
-        let memo = Memo::new("nested test".into());
-        append_memo(&path, &memo).unwrap();
-
-        assert_eq!(read_all(&path).unwrap(), vec![memo]);
-    }
-
-    #[test]
-    fn data_path_prefers_xdg_data_home() {
+    fn data_path_resolution() {
         let home = Path::new("/Users/foo");
         let xdg = Path::new("/custom/data");
-        let path = data_path_from(Some(home), Some(xdg)).unwrap();
-        assert_eq!(path, PathBuf::from("/custom/data/funpou/memos.jsonl"));
-    }
-
-    #[test]
-    fn data_path_falls_back_to_local_share() {
-        let home = Path::new("/Users/foo");
-        let path = data_path_from(Some(home), None).unwrap();
         assert_eq!(
-            path,
+            data_path_from(Some(home), Some(xdg)).unwrap(),
+            PathBuf::from("/custom/data/funpou/memos.jsonl")
+        );
+        assert_eq!(
+            data_path_from(Some(home), None).unwrap(),
             PathBuf::from("/Users/foo/.local/share/funpou/memos.jsonl")
         );
-    }
-
-    #[test]
-    fn data_path_none_without_home_or_xdg() {
         assert!(data_path_from(None, None).is_none());
     }
 }

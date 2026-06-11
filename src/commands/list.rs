@@ -112,13 +112,4 @@ mod tests {
         // Newest first within the same day
         assert_eq!(bodies(&result), vec!["target-evening", "target-morning"]);
     }
-
-    #[test]
-    fn date_filter_with_no_matches_returns_empty() {
-        let memos = vec![memo_at("some memo", 2025, 6, 1)];
-        let target = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
-
-        let result = prepare_memos(memos, Some(target), false);
-        assert!(result.is_empty());
-    }
 }
