@@ -10,11 +10,7 @@ fn memo_at(sequence: usize) -> Memo {
         .with_ymd_and_hms(2026, 3, 20, 14, 5, (sequence % 60) as u32)
         .unwrap();
 
-    Memo {
-        id: created_at.format("%Y%m%d%H%M%S").to_string(),
-        body: format!("benchmark memo {sequence:04}"),
-        created_at,
-    }
+    Memo::at(format!("benchmark memo {sequence:04}"), created_at)
 }
 
 fn bench_append_memo(c: &mut Criterion) {

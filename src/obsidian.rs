@@ -55,8 +55,6 @@ fn insert_under_heading(content: &str, heading: &str, entry: &str) -> String {
                 if content.ends_with('\n') {
                     output.push('\n');
                 }
-            } else if content.ends_with('\n') {
-                // File ended with newline, keep it
             }
 
             output
@@ -96,7 +94,7 @@ fn resolve_template_path(memo: &Memo, config: &Config) -> Result<PathBuf> {
         );
     }
 
-    Ok(PathBuf::from(&config.obsidian.vault_path).join(relative_path))
+    Ok(config.obsidian.vault_path.join(relative_path))
 }
 
 /// Append a memo to the Obsidian vault file.
@@ -196,11 +194,7 @@ mod tests {
     #[test]
     fn format_entry_substitutes_timestamp_and_body() {
         let config = Config::default();
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "test memo".into(),
-            created_at: fixed_time(),
-        };
+        let memo = Memo::at("test memo".into(), fixed_time());
         assert_eq!(
             format_entry(&memo, &config),
             "- 2026-03-20 14:05: test memo"
@@ -212,11 +206,7 @@ mod tests {
         // Body containing %Y must survive — strftime runs first on the format string only.
         let mut config = Config::default();
         config.obsidian.entry_format = "- %Y-%m-%d: {body}".into();
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "100% done %Y".into(),
-            created_at: fixed_time(),
-        };
+        let memo = Memo::at("100% done %Y".into(), fixed_time());
         assert_eq!(format_entry(&memo, &config), "- 2026-03-20: 100% done %Y");
     }
 
@@ -224,14 +214,10 @@ mod tests {
     fn append_memo_writes_resolved_path_with_heading_and_entry() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
-        config.obsidian.vault_path = dir.path().to_string_lossy().into();
+        config.obsidian.vault_path = dir.path().to_path_buf();
         config.obsidian.template_path = "daily/%Y/%Y-%m.md".into();
 
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "obsidian test".into(),
-            created_at: fixed_time(),
-        };
+        let memo = Memo::at("obsidian test".into(), fixed_time());
 
         append_memo(&memo, &config).unwrap();
 
@@ -244,14 +230,10 @@ mod tests {
     fn resolve_template_path_rejects_absolute_path() {
         let dir = tempfile::tempdir().unwrap();
         let mut config = Config::default();
-        config.obsidian.vault_path = dir.path().to_string_lossy().into();
+        config.obsidian.vault_path = dir.path().to_path_buf();
         config.obsidian.template_path = "/tmp/funpou-outside.md".into();
 
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "obsidian test".into(),
-            created_at: fixed_time(),
-        };
+        let memo = Memo::at("obsidian test".into(), fixed_time());
 
         let err = resolve_template_path(&memo, &config).unwrap_err();
         assert!(err.to_string().contains("must stay inside the vault"));
@@ -262,14 +244,10 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let vault_path = dir.path().join("vault");
         let mut config = Config::default();
-        config.obsidian.vault_path = vault_path.to_string_lossy().into();
+        config.obsidian.vault_path = vault_path;
         config.obsidian.template_path = "../outside.md".into();
 
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "obsidian test".into(),
-            created_at: fixed_time(),
-        };
+        let memo = Memo::at("obsidian test".into(), fixed_time());
 
         let err = append_memo(&memo, &config).unwrap_err();
         assert!(err.to_string().contains("must stay inside the vault"));

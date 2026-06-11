@@ -32,14 +32,7 @@ pub fn execute(
     reverse: bool,
     json: bool,
 ) -> Result<()> {
-    let memos = storage::read_all(data_path)?;
-
-    if memos.is_empty() {
-        eprintln!("No memos found.");
-        return Ok(());
-    }
-
-    let memos = prepare_memos(memos, date, reverse);
+    let memos = prepare_memos(storage::read_all(data_path)?, date, reverse);
 
     if memos.is_empty() {
         eprintln!("No memos found.");
@@ -73,11 +66,7 @@ mod tests {
         let dt = Local
             .with_ymd_and_hms(year, month, day, hour, 0, 0)
             .unwrap();
-        Memo {
-            id: dt.format("%Y%m%d%H%M%S").to_string(),
-            body: body.to_string(),
-            created_at: dt,
-        }
+        Memo::at(body.to_string(), dt)
     }
 
     fn bodies(memos: &[Memo]) -> Vec<&str> {

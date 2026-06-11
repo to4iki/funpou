@@ -22,7 +22,7 @@ impl Default for Config {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ObsidianConfig {
-    pub vault_path: String,
+    pub vault_path: PathBuf,
     pub template_path: String,
     pub target_heading: String,
     /// strftime format with a `{body}` placeholder for the memo text.
@@ -32,7 +32,7 @@ pub struct ObsidianConfig {
 impl Default for ObsidianConfig {
     fn default() -> Self {
         Self {
-            vault_path: String::new(),
+            vault_path: PathBuf::new(),
             template_path: "daily/%Y-%m-%d.md".into(),
             target_heading: "## Memos".into(),
             entry_format: "- %Y-%m-%d %H:%M: {body}".into(),
@@ -43,19 +43,22 @@ impl Default for ObsidianConfig {
 impl ObsidianConfig {
     /// Returns true when vault_path is set to a non-empty value.
     pub fn is_enabled(&self) -> bool {
-        !self.vault_path.trim().is_empty()
+        !self.vault_path.as_os_str().is_empty()
     }
 }
 
 /// Expand a leading `~` or `~/` to the given home directory.
-fn expand_tilde(path: &str, home: Option<&Path>) -> String {
-    match home {
-        Some(home) if path == "~" => home.to_string_lossy().into_owned(),
-        Some(home) => match path.strip_prefix("~/") {
-            Some(rest) => home.join(rest).to_string_lossy().into_owned(),
-            None => path.to_string(),
+fn expand_tilde(path: &Path, home: Option<&Path>) -> PathBuf {
+    let Some(home) = home else {
+        return path.to_path_buf();
+    };
+    match path.to_str() {
+        Some("~") => home.to_path_buf(),
+        Some(s) => match s.strip_prefix("~/") {
+            Some(rest) => home.join(rest),
+            None => path.to_path_buf(),
         },
-        None => path.to_string(),
+        None => path.to_path_buf(),
     }
 }
 
@@ -140,7 +143,7 @@ mod tests {
         let config = load_config(&path).unwrap();
         assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M:%S");
         assert!(config.obsidian.is_enabled());
-        assert_eq!(config.obsidian.vault_path, "/tmp/vault");
+        assert_eq!(config.obsidian.vault_path, PathBuf::from("/tmp/vault"));
         assert_eq!(config.obsidian.template_path, "notes/%Y-%m-%d.md");
         assert_eq!(config.obsidian.target_heading, "## Quick Notes");
         assert_eq!(config.obsidian.entry_format, "- {body} (%Y-%m-%d %H:%M)");
@@ -150,31 +153,43 @@ mod tests {
     fn expand_tilde_with_home() {
         let home = Path::new("/Users/foo");
         assert_eq!(
-            expand_tilde("~/valut/to4iki", Some(home)),
-            "/Users/foo/valut/to4iki"
+            expand_tilde(Path::new("~/valut/to4iki"), Some(home)),
+            PathBuf::from("/Users/foo/valut/to4iki")
         );
-        assert_eq!(expand_tilde("~", Some(home)), "/Users/foo");
+        assert_eq!(
+            expand_tilde(Path::new("~"), Some(home)),
+            PathBuf::from("/Users/foo")
+        );
     }
 
     #[test]
     fn expand_tilde_leaves_absolute_and_relative_paths() {
         let home = Path::new("/Users/foo");
-        assert_eq!(expand_tilde("/abs/path", Some(home)), "/abs/path");
-        assert_eq!(expand_tilde("rel/path", Some(home)), "rel/path");
-        assert_eq!(expand_tilde("", Some(home)), "");
+        assert_eq!(
+            expand_tilde(Path::new("/abs/path"), Some(home)),
+            PathBuf::from("/abs/path")
+        );
+        assert_eq!(
+            expand_tilde(Path::new("rel/path"), Some(home)),
+            PathBuf::from("rel/path")
+        );
+        assert_eq!(expand_tilde(Path::new(""), Some(home)), PathBuf::from(""));
     }
 
     #[test]
     fn expand_tilde_only_handles_slash_prefix() {
         let home = Path::new("/Users/foo");
         // `~user/path` is shell user-expansion, not supported here
-        assert_eq!(expand_tilde("~bar/path", Some(home)), "~bar/path");
+        assert_eq!(
+            expand_tilde(Path::new("~bar/path"), Some(home)),
+            PathBuf::from("~bar/path")
+        );
     }
 
     #[test]
     fn expand_tilde_without_home_keeps_path() {
-        assert_eq!(expand_tilde("~/x", None), "~/x");
-        assert_eq!(expand_tilde("~", None), "~");
+        assert_eq!(expand_tilde(Path::new("~/x"), None), PathBuf::from("~/x"));
+        assert_eq!(expand_tilde(Path::new("~"), None), PathBuf::from("~"));
     }
 
     #[test]
@@ -205,6 +220,9 @@ mod tests {
 
         let home = Path::new("/Users/foo");
         let config = load_config_with_home(&path, Some(home)).unwrap();
-        assert_eq!(config.obsidian.vault_path, "/Users/foo/valut/to4iki");
+        assert_eq!(
+            config.obsidian.vault_path,
+            PathBuf::from("/Users/foo/valut/to4iki")
+        );
     }
 }
