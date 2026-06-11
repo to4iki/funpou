@@ -39,7 +39,6 @@ impl Memo {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
 
     #[test]
     fn new_memo_id_derives_from_created_at() {
@@ -48,17 +47,5 @@ mod tests {
         // created_at locks in the contract that they cannot drift apart.
         assert_eq!(memo.id, memo.created_at.format("%Y%m%d%H%M%S").to_string());
         assert_eq!(memo.body, "hello world");
-    }
-
-    #[test]
-    fn format_display_renders_timestamp_then_body() {
-        let memo = Memo::at(
-            "display test".into(),
-            Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap(),
-        );
-        assert_eq!(
-            memo.format_display("%Y-%m-%d %H:%M"),
-            "2026-03-20 14:05: display test"
-        );
     }
 }

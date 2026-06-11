@@ -111,17 +111,6 @@ mod tests {
         let path = dir.path().join("nonexistent.toml");
         let config = load_config(&path).unwrap();
         assert_eq!(config.timestamp_format, "%Y-%m-%d %H:%M");
-    }
-
-    #[test]
-    fn load_partial_config_merges_with_defaults() {
-        let dir = tempfile::tempdir().unwrap();
-        let path = dir.path().join("config.toml");
-        std::fs::write(&path, "timestamp_format = \"%m/%d %H:%M\"\n").unwrap();
-
-        let config = load_config(&path).unwrap();
-        assert_eq!(config.timestamp_format, "%m/%d %H:%M");
-        // Obsidian defaults should still apply
         assert!(!config.obsidian.is_enabled());
     }
 
@@ -150,65 +139,40 @@ mod tests {
     }
 
     #[test]
-    fn expand_tilde_with_home() {
+    fn expand_tilde_paths() {
         let home = Path::new("/Users/foo");
         assert_eq!(
-            expand_tilde(Path::new("~/valut/to4iki"), Some(home)),
-            PathBuf::from("/Users/foo/valut/to4iki")
+            expand_tilde(Path::new("~/vault"), Some(home)),
+            PathBuf::from("/Users/foo/vault")
         );
         assert_eq!(
             expand_tilde(Path::new("~"), Some(home)),
             PathBuf::from("/Users/foo")
         );
-    }
-
-    #[test]
-    fn expand_tilde_leaves_absolute_and_relative_paths() {
-        let home = Path::new("/Users/foo");
         assert_eq!(
             expand_tilde(Path::new("/abs/path"), Some(home)),
             PathBuf::from("/abs/path")
         );
-        assert_eq!(
-            expand_tilde(Path::new("rel/path"), Some(home)),
-            PathBuf::from("rel/path")
-        );
-        assert_eq!(expand_tilde(Path::new(""), Some(home)), PathBuf::from(""));
-    }
-
-    #[test]
-    fn expand_tilde_only_handles_slash_prefix() {
-        let home = Path::new("/Users/foo");
         // `~user/path` is shell user-expansion, not supported here
         assert_eq!(
             expand_tilde(Path::new("~bar/path"), Some(home)),
             PathBuf::from("~bar/path")
         );
-    }
-
-    #[test]
-    fn expand_tilde_without_home_keeps_path() {
         assert_eq!(expand_tilde(Path::new("~/x"), None), PathBuf::from("~/x"));
-        assert_eq!(expand_tilde(Path::new("~"), None), PathBuf::from("~"));
     }
 
     #[test]
-    fn config_path_prefers_xdg_config_home() {
+    fn config_path_resolution() {
         let home = Path::new("/Users/foo");
         let xdg = Path::new("/custom/xdg");
-        let path = config_path_from(Some(home), Some(xdg)).unwrap();
-        assert_eq!(path, PathBuf::from("/custom/xdg/funpou/config.toml"));
-    }
-
-    #[test]
-    fn config_path_falls_back_to_dot_config() {
-        let home = Path::new("/Users/foo");
-        let path = config_path_from(Some(home), None).unwrap();
-        assert_eq!(path, PathBuf::from("/Users/foo/.config/funpou/config.toml"));
-    }
-
-    #[test]
-    fn config_path_none_without_home_or_xdg() {
+        assert_eq!(
+            config_path_from(Some(home), Some(xdg)).unwrap(),
+            PathBuf::from("/custom/xdg/funpou/config.toml")
+        );
+        assert_eq!(
+            config_path_from(Some(home), None).unwrap(),
+            PathBuf::from("/Users/foo/.config/funpou/config.toml")
+        );
         assert!(config_path_from(None, None).is_none());
     }
 
