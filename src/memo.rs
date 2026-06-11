@@ -10,11 +10,19 @@ pub struct Memo {
 
 impl Memo {
     pub fn new(body: String) -> Self {
-        let now = Local::now();
+        Self::at(body, Local::now())
+    }
+
+    /// Build a memo with an explicit creation time.
+    ///
+    /// The id is always derived from `created_at`, keeping the on-disk
+    /// identifier and sort key in lockstep. Tests and benchmarks use this to
+    /// produce deterministic memos without duplicating the id-formatting rule.
+    pub fn at(body: String, created_at: DateTime<Local>) -> Self {
         Self {
-            id: now.format("%Y%m%d%H%M%S").to_string(),
+            id: created_at.format("%Y%m%d%H%M%S").to_string(),
             body,
-            created_at: now,
+            created_at,
         }
     }
 
@@ -44,11 +52,10 @@ mod tests {
 
     #[test]
     fn format_display_renders_timestamp_then_body() {
-        let memo = Memo {
-            id: "20260320140532".into(),
-            body: "display test".into(),
-            created_at: Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap(),
-        };
+        let memo = Memo::at(
+            "display test".into(),
+            Local.with_ymd_and_hms(2026, 3, 20, 14, 5, 32).unwrap(),
+        );
         assert_eq!(
             memo.format_display("%Y-%m-%d %H:%M"),
             "2026-03-20 14:05: display test"
