@@ -81,6 +81,11 @@ entry_format = "- %Y-%m-%d %H:%M: {body}"
 - [Configuration](docs/configuration.md) — All config options and Obsidian setup
 - [Usage](docs/usage.md) — Commands, flags, and shell integration
 
+## Releasing
+
+Releases are managed by [release-plz](https://release-plz.dev/). Merging the release PR creates a version tag, publishes to crates.io, and uploads Homebrew binaries to the GitHub Release.
+
 ## License
 
 MIT
+
