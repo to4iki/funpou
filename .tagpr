@@ -1,5 +1,0 @@
-[tagpr]
-	vPrefix = true
-	releaseBranch = main
-	versionFile = Cargo.toml
-	postVersionCommand = cargo update --workspace --package funpou
