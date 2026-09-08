@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.7](https://github.com/to4iki/funpou/compare/v0.1.6...v0.1.7) - 2026-09-08
+
+### Other
+
+- replace tagpr with release-plz
+
 ## [v0.1.6](https://github.com/to4iki/funpou/compare/v0.1.5...v0.1.6) - 2026-06-11
 
 - Add Criterion benchmarks by @to4iki in https://github.com/to4iki/funpou/pull/38
